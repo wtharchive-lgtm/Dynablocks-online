@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Parrot Cay - Dynablocks-like (three.js v2)</title>
+<title>Parrot Cay - Dynablocks-like (three.js v3)</title>
 <style>
 *{box-sizing:border-box}
 html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#7fb4e6;font-family:Tahoma,Verdana,Arial,sans-serif;-webkit-user-select:none;user-select:none}
@@ -22,7 +22,8 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#7fb4e6;fon
 .panel b{display:inline-block;min-width:78px}
 .panel .btn{margin:4px 0 0;height:24px;line-height:18px}
 .panel .btn.active{line-height:22px}
-#info{right:8px;top:8px;width:250px}
+#info{right:8px;top:8px;width:250px;display:none}
+#info.show{display:block}
 #posePanel{right:8px;bottom:8px;width:250px;display:none}
 #posePanel .row{display:flex;gap:4px}
 #posePanel .row .btn{margin-top:4px}
@@ -39,7 +40,6 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#7fb4e6;fon
 .ibtn:hover{filter:brightness(1.12)}
 .ibtn.active{box-shadow:0 0 0 3px #19e6ee}
 #runBtn{width:70px;height:70px;margin-bottom:12px}
-#runBtn.on{filter:hue-rotate(240deg) saturate(1.3)}
 #toolSelect{width:60px;height:60px;margin-bottom:6px}
 .pair{display:flex;justify-content:center;gap:12px;margin-bottom:4px}
 .pair .ibtn{margin:0;width:42px;height:42px}
@@ -51,16 +51,30 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#7fb4e6;fon
 #trashBtn{width:66px;height:66px;margin-bottom:2px}
 #menuBtn{display:block;width:100%;text-align:center;color:#fff;font:600 24px 'Segoe UI',Tahoma,Arial,sans-serif;padding:0}
 #menuL.running .ibtn:not(#runBtn),#menuL.running .tbtn:not(#poseBtn):not(#menuBtn){opacity:.4;pointer-events:none}
-#snapFx{position:fixed;left:0;top:0;right:0;bottom:0;pointer-events:none;z-index:3;opacity:0;background:radial-gradient(ellipse at center,rgba(255,255,255,0) 45%,rgba(255,255,255,.75) 100%)}
+
+/* ---- skybox: CSS 3D cube, every side = Assets/Icons/sky.png (works from file:// too) ---- */
+#sky{position:fixed;left:0;top:0;right:0;bottom:0;z-index:0;background:linear-gradient(#3f8fe0,#cfe6f8);perspective:640px}
+#skyCube{position:absolute;left:50%;top:50%;width:0;height:0;transform-style:preserve-3d}
+.sf{position:absolute;left:-803px;top:-803px;width:1606px;height:1606px;background:url(Assets/Icons/sky.png) center/100% 100% no-repeat}
+.sf:nth-child(1){transform:translateZ(-800px)}
+.sf:nth-child(2){transform:rotateY(90deg) translateZ(-800px)}
+.sf:nth-child(3){transform:rotateY(180deg) translateZ(-800px)}
+.sf:nth-child(4){transform:rotateY(270deg) translateZ(-800px)}
+.sf:nth-child(5){transform:rotateX(90deg) translateZ(-800px)}
+.sf:nth-child(6){transform:rotateX(-90deg) translateZ(-800px)}
+/* ---- custom mouse cursor (Assets/Icons/mouse.png) ---- */
+#cursorImg{position:fixed;left:0;top:0;width:32px;height:32px;object-fit:contain;object-position:left top;pointer-events:none;z-index:9999;display:none;will-change:transform}
+html.mc,html.mc *{cursor:none !important}
 </style>
 </head>
 <body>
 <canvas id="hud"></canvas>
 
-<div id="snapFx"></div>
+<div id="sky"><div id="skyCube"><div class="sf"></div><div class="sf"></div><div class="sf"></div><div class="sf"></div><div class="sf"></div><div class="sf"></div></div></div>
+<img id="cursorImg" src="Assets/Icons/mouse.png" alt="" draggable="false" onload="document.documentElement.classList.add('mc')" onerror="document.documentElement.classList.remove('mc')">
 
 <div id="menuL">
-  <button class="ibtn" id="runBtn" type="button" title="Run"><img src="Assets/Icons/run.png" alt="" draggable="false" onerror="this.parentNode.classList.add('noimg')"><span>GO</span></button>
+  <button class="ibtn" id="runBtn" type="button" title="Run"><img id="runImg" src="Assets/Icons/go.png" alt="" draggable="false" onload="this.parentNode.classList.remove('noimg')" onerror="this.parentNode.classList.add('noimg')"><span id="runTxt">GO</span></button>
   <button class="ibtn active" id="toolSelect" data-tool="select" type="button" title="Select"><img src="Assets/Icons/select.png" alt="" draggable="false" onerror="this.parentNode.classList.add('noimg')"><span>Select</span></button>
   <div class="pair">
     <button class="ibtn" id="toolScale" data-tool="scale" type="button" title="Scale"><img src="Assets/Icons/scale.png" alt="" draggable="false" onerror="this.parentNode.classList.add('noimg')"><span>Scale</span></button>
@@ -79,7 +93,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#7fb4e6;fon
   <h1>Parrot Cay - Dynablocks-like</h1>
   <div><b>Build mode</b></div>
   <div><b>Right-drag</b> rotate camera</div>
-  <div><b>Wheel</b> zoom (zooming in snaps)</div>
+  <div><b>Wheel</b> zoom (stepped, with a snap)</div>
   <div><b>W A S D / arrows</b> pan camera</div>
   <div><b>F</b> focus selected part</div>
   <div><b>Delete</b> / Trash = delete part</div>
@@ -128,6 +142,17 @@ var doc=document,win=window;
 function $(id){return doc.getElementById(id);}
 var statusEl=$('status');
 function say(t){statusEl.textContent=t;}
+/* mouse.png is drawn by us (not CSS cursor) so any image size works; hotspot = top-left corner */
+(function(){
+  var cur=$('cursorImg'),root=doc.documentElement,CURSOR_PX=32;
+  cur.style.width=cur.style.height=CURSOR_PX+'px';
+  win.addEventListener('mousemove',function(e){
+    if(!root.classList.contains('mc'))return;
+    cur.style.display='block';
+    cur.style.transform='translate('+e.clientX+'px,'+e.clientY+'px)';
+  },true);
+  root.addEventListener('mouseleave',function(){cur.style.display='none';});
+})();
 if(typeof THREE==='undefined'){
   say('three.js could not be loaded. Connect to the internet, or put three.min.js (r128) next to this .html file.');
   return;
@@ -137,20 +162,15 @@ function hyp(a,b){return Math.sqrt(a*a+b*b);}
 function wrapAng(a){while(a>Math.PI)a-=Math.PI*2;while(a<-Math.PI)a+=Math.PI*2;return a;}
 
 /* ---------- renderer / scene ---------- */
-var renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
+var renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:'high-performance'});
 renderer.setPixelRatio(Math.min(win.devicePixelRatio||1,1.5));
+renderer.setClearColor(0x000000,0);
 renderer.domElement.id='view';
 doc.body.insertBefore(renderer.domElement,doc.body.firstChild);   /* no shadows anywhere */
 var canvas=renderer.domElement;
-var hud=$('hud'),hctx=hud.getContext('2d'),snapFx=$('snapFx');
+var hud=$('hud'),hctx=hud.getContext('2d'),skyEl=$('sky'),skyCube=$('skyCube');
 var scene=new THREE.Scene();
 var camera=new THREE.PerspectiveCamera(70,1,.2,900);
-(function(){
-  var c=doc.createElement('canvas');c.width=4;c.height=256;
-  var x=c.getContext('2d'),g=x.createLinearGradient(0,0,0,256);
-  g.addColorStop(0,'#3f8fe0');g.addColorStop(1,'#cfe6f8');x.fillStyle=g;x.fillRect(0,0,4,256);
-  scene.background=new THREE.CanvasTexture(c);
-})();
 scene.add(new THREE.AmbientLight(0xffffff,.6));
 var sun=new THREE.DirectionalLight(0xffffff,.42);
 sun.position.set(-.42,.82,.37);
@@ -159,7 +179,7 @@ scene.add(sun);
 /* ---------- state ---------- */
 var VW=800,VH=450;
 var parts=[],selected=null,tool='select',running=false,uhjk=false,flatStuds=false;
-var yaw=.7,pitch=.55,camDist=30,camDistT=30,snapT=0,lastSnapSnd=0,focus=[0,1,0],saved=null;
+var yaw=.7,pitch=.55,camDist=30,camDistT=30,fovK=0,lastSnapFx=0,zoomAcc=0,focus=[0,1,0],saved=null;
 var keys={};
 var pos={x:0,y:0,z:0},vy=0,facing=0,grounded=false;
 var R=1,CH=5.8,STEP=1.05,GRAV=90,WALK=14,TURN=2.4;
@@ -309,6 +329,14 @@ function proj(x,y,z){
   _v.applyMatrix4(camera.projectionMatrix);
   return [(_v.x*.5+.5)*VW,(-_v.y*.5+.5)*VH];
 }
+/* skybox: rotate the CSS cube with the same view matrix the WebGL camera uses */
+function updateSky(){
+  var P=(VH/2)/Math.tan(camera.fov*Math.PI/360),e=camera.matrixWorldInverse.elements;
+  function m(i,j){var v=e[j*4+i];return ((i===1)!==(j===1))?-v:v;}   /* flip Y: three is Y-up, CSS is Y-down */
+  skyEl.style.perspective=P.toFixed(1)+'px';
+  skyCube.style.transform='translateZ('+P.toFixed(1)+'px) matrix3d('+
+    [m(0,0),m(1,0),m(2,0),0, m(0,1),m(1,1),m(2,1),0, m(0,2),m(1,2),m(2,2),0, 0,0,0,1].join(',')+')';
+}
 function resize(){
   VW=win.innerWidth||800;VH=win.innerHeight||450;
   renderer.setPixelRatio(Math.min(win.devicePixelRatio||1,1.5));
@@ -334,13 +362,13 @@ function pickLimb(cx,cy){
 }
 
 /* ---------- HUD: selection box + handles ---------- */
-var AXC=['#e8402e','#2fb344','#3b6cf0'];
+var AXC=['#d0605a','#5fb06a','#5a86d0'];
 function drawSelection(){
   var p=selected;if(!p)return;
   var g=.03,mn=[p.mn[0]-g,p.mn[1]-g,p.mn[2]-g],mx=[p.mx[0]+g,p.mx[1]+g,p.mx[2]+g],c=[],b;
   for(b=0;b<8;b++)c.push(proj(b&1?mx[0]:mn[0],b&2?mx[1]:mn[1],b&4?mx[2]:mn[2]));
   var E=[[0,1],[2,3],[4,5],[6,7],[0,2],[1,3],[4,6],[5,7],[0,4],[1,5],[2,6],[3,7]];
-  hctx.strokeStyle='#2a8cff';hctx.lineWidth=2.5;hctx.beginPath();
+  hctx.strokeStyle='#2a8cff';hctx.lineWidth=1.75;hctx.beginPath();
   for(b=0;b<E.length;b++){
     var A=c[E[b][0]],B=c[E[b][1]];
     if(!A||!B)continue;
@@ -362,16 +390,22 @@ function getHandles(){
   return out;
 }
 function drawArrow(h,hot,isMove){
-  hctx.strokeStyle=hot?'#fff':AXC[h.a];hctx.lineWidth=2.5;
-  hctx.beginPath();hctx.moveTo(h.sf[0],h.sf[1]);hctx.lineTo(h.st[0],h.st[1]);hctx.stroke();
-  hctx.fillStyle=hot?'#fff':AXC[h.a];hctx.strokeStyle='#000';hctx.lineWidth=1.5;
+  var col=hot?'#ffffff':AXC[h.a];
   var dx=h.st[0]-h.sf[0],dy=h.st[1]-h.sf[1],l=hyp(dx,dy)||1;dx/=l;dy/=l;
+  var px=-dy,py=dx,tx=h.st[0],ty=h.st[1];
+  hctx.lineCap='round';hctx.lineJoin='round';
+  /* thin shaft with a faint dark under-line so it reads on any background */
+  var ex=isMove?tx-dx*2:tx,ey=isMove?ty-dy*2:ty;
+  hctx.strokeStyle='rgba(0,0,0,.4)';hctx.lineWidth=3;
+  hctx.beginPath();hctx.moveTo(h.sf[0],h.sf[1]);hctx.lineTo(ex,ey);hctx.stroke();
+  hctx.strokeStyle=col;hctx.lineWidth=1.5;
+  hctx.beginPath();hctx.moveTo(h.sf[0],h.sf[1]);hctx.lineTo(ex,ey);hctx.stroke();
+  hctx.fillStyle=col;hctx.strokeStyle='rgba(0,0,0,.55)';hctx.lineWidth=1;
   hctx.beginPath();
-  if(isMove){
-    var px=-dy,py=dx,sx=h.st[0],sy=h.st[1];
-    hctx.moveTo(sx+dx*10,sy+dy*10);hctx.lineTo(sx-dx*4+px*8,sy-dy*4+py*8);hctx.lineTo(sx-dx*4-px*8,sy-dy*4-py*8);
-  }else{
-    hctx.rect(h.st[0]-6,h.st[1]-6,12,12);
+  if(isMove){                      /* small, slim arrowhead */
+    hctx.moveTo(tx+dx*8,ty+dy*8);hctx.lineTo(tx-dx*2+px*3.5,ty-dy*2+py*3.5);hctx.lineTo(tx-dx*2-px*3.5,ty-dy*2-py*3.5);
+  }else{                           /* small square end-stop for scaling */
+    hctx.rect(tx-3.5,ty-3.5,7,7);
   }
   hctx.closePath();hctx.fill();hctx.stroke();
 }
@@ -422,7 +456,7 @@ function drawPoseHandles(){
     else{
       hctx.lineJoin='round';
       for(var pass=0;pass<2;pass++){
-        hctx.strokeStyle=pass?(hot?'#fff':AXC[h.a]):'#000';hctx.lineWidth=pass?3:5;hctx.beginPath();
+        hctx.strokeStyle=pass?(hot?'#fff':AXC[h.a]):'rgba(0,0,0,.4)';hctx.lineWidth=pass?1.75:3.5;hctx.beginPath();
         for(j=0;j<h.pts.length;j++){if(j===0)hctx.moveTo(h.pts[j][0],h.pts[j][1]);else hctx.lineTo(h.pts[j][0],h.pts[j][1]);}
         hctx.stroke();
       }
@@ -572,6 +606,7 @@ function setRun(v){
   running=v;
   $('runBtn').classList.toggle('on',v);
   $('runBtn').title=v?'Stop':'Run';
+  $('runImg').src='Assets/Icons/'+(v?'stop':'go')+'.png';$('runTxt').textContent=v?'STOP':'GO';
   $('menuL').classList.toggle('running',v);
   $('poseBtn').classList.toggle('off',!v);
   charRoot.visible=v;
@@ -591,9 +626,10 @@ function setRun(v){
 }
 function wire(id,fn){var el=$(id);el.addEventListener('click',function(){fn();el.blur();});}
 wire('partBtn',insertPart);
+new Image().src='Assets/Icons/stop.png';   /* preload so the swap is instant */
 wire('trashBtn',deleteSelected);
 wire('dupBtn',duplicateSelected);
-wire('menuBtn',function(){var i=$('info');i.style.display=(i.style.display==='none')?'block':'none';});
+wire('menuBtn',function(){$('info').classList.toggle('show');});
 wire('runBtn',function(){setRun(!running);});
 wire('poseBtn',function(){setPose(!poseOn);});
 wire('toolSelect',function(){setTool('select');});
@@ -730,13 +766,24 @@ win.addEventListener('mouseup',function(e){
     }
   }
 });
+/* old-Roblox style zoom: fixed steps per wheel notch, eased quickly; the snap only fires now and then */
+var ZOOM_STEP=1.22,ZOOM_NOTCH=60,SNAP_COOLDOWN=320;
 canvas.addEventListener('wheel',function(e){
-  var d=e.deltaY*(e.deltaMode===1?33:1),old=camDistT;
-  camDistT=clamp(camDistT*Math.exp(d*.001),4,140);
-  if(d<0&&camDistT<old-1e-6){            /* zooming IN: snap effect + sound */
-    snapT=1;
+  var d=e.deltaY*(e.deltaMode===1?33:1);
+  if((zoomAcc>0)!==(d>0))zoomAcc=0;
+  zoomAcc+=d;
+  var old=camDistT,dir=0,steps=0;
+  while(Math.abs(zoomAcc)>=ZOOM_NOTCH&&steps<3){
+    dir=zoomAcc<0?-1:1;zoomAcc-=dir*ZOOM_NOTCH;steps++;
+    camDistT=clamp(camDistT*(dir<0?1/ZOOM_STEP:ZOOM_STEP),4,140);
+  }
+  if(dir!==0&&Math.abs(camDistT-old)>1e-6){
     var now=performance.now();
-    if(now-lastSnapSnd>110){lastSnapSnd=now;sfxSnap();}
+    if(now-lastSnapFx>SNAP_COOLDOWN){
+      lastSnapFx=now;
+      fovK=dir<0?-5:5;               /* in = lens tightens, out = lens widens, then relaxes */
+      sfxSnap();
+    }
   }
   e.preventDefault();
 },{passive:false});
@@ -751,15 +798,15 @@ function frame(){
   last=t;if(dt<=0)dt=.001;
   try{
     update(dt);
-    camDist+=(camDistT-camDist)*(1-Math.exp(-dt*16));
+    camDist+=(camDistT-camDist)*(1-Math.exp(-dt*20));
     if(Math.abs(camDistT-camDist)<.001)camDist=camDistT;
-    snapT=Math.max(0,snapT-dt*4.5);
-    var fv=70-9*snapT*snapT;                 /* quick FOV punch that relaxes back */
+    fovK*=Math.exp(-dt*12);if(Math.abs(fovK)<.01)fovK=0;
+    var fv=70+fovK;
     if(Math.abs(camera.fov-fv)>.001){camera.fov=fv;camera.updateProjectionMatrix();}
-    snapFx.style.opacity=(snapT*.55).toFixed(3);
     charRoot.position.set(pos.x,pos.y,pos.z);
     charRoot.rotation.y=facing;
     updateCamera();
+    updateSky();
     renderer.render(scene,camera);
     drawHud();
   }catch(err){say('Error: '+(err&&err.message?err.message:err));}
