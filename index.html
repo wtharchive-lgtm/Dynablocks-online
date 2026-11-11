@@ -3,24 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Parrot Cay - Dynablocks-like (three.js)</title>
+<title>Parrot Cay - Dynablocks-like (three.js v2)</title>
 <style>
 *{box-sizing:border-box}
 html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#7fb4e6;font-family:Tahoma,Verdana,Arial,sans-serif;-webkit-user-select:none;user-select:none}
 #view{position:fixed;left:0;top:0;display:block;outline:none;z-index:1}
 #hud{position:fixed;left:0;top:0;pointer-events:none;z-index:2}
 
-#tools{position:fixed;left:8px;top:8px;width:84px;padding:4px;background:#d4d0c8;border:2px solid;border-color:#fff #404040 #404040 #fff;z-index:5}
-#tools .sep{height:10px}
 .btn{display:block;width:100%;height:30px;margin:0 0 4px;padding:0 4px;background:#d4d0c8;color:#000;font:bold 12px Tahoma,Verdana,Arial,sans-serif;
   border:2px solid;border-color:#fff #404040 #404040 #fff;cursor:pointer;outline:none;text-align:center;line-height:24px}
 .btn:hover{background:#e2dfd8}
 .btn.active{border-color:#404040 #fff #fff #404040;background:#bdb9ae;line-height:28px}
 .btn svg{vertical-align:middle;margin-right:3px}
 .btn.off{opacity:.45;pointer-events:none}
-#runBtn{background:#b9d9a8}
-#runBtn.on{background:#e8a29a;border-color:#404040 #fff #fff #404040}
-#tools.running .btn:not(#runBtn):not(#poseBtn){opacity:.45;pointer-events:none}
 
 .panel{position:fixed;padding:8px 10px;background:#d4d0c8;border:2px solid;border-color:#fff #404040 #404040 #fff;font-size:11px;line-height:1.55;color:#000;z-index:5}
 .panel h1{margin:0 0 4px;font-size:13px}
@@ -31,31 +26,60 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#7fb4e6;fon
 #posePanel{right:8px;bottom:8px;width:250px;display:none}
 #posePanel .row{display:flex;gap:4px}
 #posePanel .row .btn{margin-top:4px}
-#status{position:fixed;left:8px;bottom:8px;padding:4px 8px;background:#d4d0c8;border:2px solid;border-color:#404040 #fff #fff #404040;font-size:11px;color:#000;z-index:5;max-width:calc(100% - 280px)}
+#status{position:fixed;left:142px;bottom:8px;padding:4px 8px;background:#d4d0c8;border:2px solid;border-color:#404040 #fff #fff #404040;font-size:11px;color:#000;z-index:5;max-width:calc(100% - 430px)}
+
+/* ---- left menu (matches UI.png) ---- */
+#menuL{position:fixed;left:8px;top:8px;width:116px;padding:12px 0 8px;background:#a59cbc;border:6px solid #4f86bd;z-index:5;text-align:center;font-family:'Segoe UI',Tahoma,Arial,sans-serif}
+.ibtn{display:block;margin:0 auto;padding:0;border:0;background:none;border-radius:50%;cursor:pointer;outline:none;position:relative}
+.ibtn img{display:block;width:100%;height:100%;pointer-events:none;-webkit-user-drag:none;user-select:none}
+.ibtn span{display:none}
+.ibtn.noimg{background:#d4d0c8;border:2px solid;border-color:#fff #404040 #404040 #fff;border-radius:6px}
+.ibtn.noimg img{display:none}
+.ibtn.noimg span{display:block;position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);font:bold 11px Tahoma,Arial,sans-serif;color:#000;line-height:1}
+.ibtn:hover{filter:brightness(1.12)}
+.ibtn.active{box-shadow:0 0 0 3px #19e6ee}
+#runBtn{width:70px;height:70px;margin-bottom:12px}
+#runBtn.on{filter:hue-rotate(240deg) saturate(1.3)}
+#toolSelect{width:60px;height:60px;margin-bottom:6px}
+.pair{display:flex;justify-content:center;gap:12px;margin-bottom:4px}
+.pair .ibtn{margin:0;width:42px;height:42px}
+.txts{text-align:left;padding:0 0 0 12px;margin:4px 0 8px}
+.tbtn{display:block;margin:0;padding:3px 0;background:none;border:0;color:#d8d0f0;font:600 13px 'Segoe UI',Tahoma,Arial,sans-serif;cursor:pointer;outline:none;text-align:left}
+.tbtn:hover{color:#fff}
+.tbtn.active{color:#fff;text-decoration:underline}
+.tbtn.off{opacity:.45;pointer-events:none}
+#trashBtn{width:66px;height:66px;margin-bottom:2px}
+#menuBtn{display:block;width:100%;text-align:center;color:#fff;font:600 24px 'Segoe UI',Tahoma,Arial,sans-serif;padding:0}
+#menuL.running .ibtn:not(#runBtn),#menuL.running .tbtn:not(#poseBtn):not(#menuBtn){opacity:.4;pointer-events:none}
+#snapFx{position:fixed;left:0;top:0;right:0;bottom:0;pointer-events:none;z-index:3;opacity:0;background:radial-gradient(ellipse at center,rgba(255,255,255,0) 45%,rgba(255,255,255,.75) 100%)}
 </style>
 </head>
 <body>
 <canvas id="hud"></canvas>
 
-<div id="tools">
-  <button class="btn" id="partBtn" type="button" title="Insert a new part">+ Part</button>
-  <div class="sep"></div>
-  <button class="btn active" id="toolSelect" data-tool="select" type="button">Select</button>
-  <button class="btn" id="toolMove" data-tool="move" type="button">Move</button>
-  <button class="btn" id="toolScale" data-tool="scale" type="button">Scale</button>
-  <div class="sep"></div>
-  <button class="btn off" id="poseBtn" type="button" title="Pose the character's limbs (only while running)">Pose</button>
-  <button class="btn" id="runBtn" type="button" title="Spawn Parrot Cay and play the music">Run</button>
-  <button class="btn" id="trashBtn" type="button" title="Delete the selected part">
-    <svg width="14" height="16" viewBox="0 0 14 16"><rect x="1" y="3" width="12" height="2" fill="#000"/><rect x="5" y="1" width="4" height="2" fill="#000"/><path d="M2 6h10l-1 9H3z" fill="#666" stroke="#000"/><path d="M5 8v5M7 8v5M9 8v5" stroke="#fff"/></svg>Trash
-  </button>
+<div id="snapFx"></div>
+
+<div id="menuL">
+  <button class="ibtn" id="runBtn" type="button" title="Run"><img src="Assets/Icons/run.png" alt="" draggable="false" onerror="this.parentNode.classList.add('noimg')"><span>GO</span></button>
+  <button class="ibtn active" id="toolSelect" data-tool="select" type="button" title="Select"><img src="Assets/Icons/select.png" alt="" draggable="false" onerror="this.parentNode.classList.add('noimg')"><span>Select</span></button>
+  <div class="pair">
+    <button class="ibtn" id="toolScale" data-tool="scale" type="button" title="Scale"><img src="Assets/Icons/scale.png" alt="" draggable="false" onerror="this.parentNode.classList.add('noimg')"><span>Scale</span></button>
+    <button class="ibtn" id="toolMove" data-tool="move" type="button" title="Move"><img src="Assets/Icons/move.png" alt="" draggable="false" onerror="this.parentNode.classList.add('noimg')"><span>Move</span></button>
+  </div>
+  <div class="txts">
+    <button class="tbtn" id="partBtn" type="button">Insert Part</button>
+    <button class="tbtn" id="dupBtn" type="button">Duplicate</button>
+    <button class="tbtn off" id="poseBtn" type="button" title="Pose the character's limbs (only while running)">Pose</button>
+  </div>
+  <button class="ibtn" id="trashBtn" type="button" title="Delete the selected part"><img src="Assets/Icons/trash.png" alt="" draggable="false" onerror="this.parentNode.classList.add('noimg')"><span>Trash</span></button>
+  <button class="tbtn" id="menuBtn" type="button">MENU</button>
 </div>
 
 <div id="info" class="panel">
   <h1>Parrot Cay - Dynablocks-like</h1>
   <div><b>Build mode</b></div>
   <div><b>Right-drag</b> rotate camera</div>
-  <div><b>Wheel</b> zoom</div>
+  <div><b>Wheel</b> zoom (zooming in snaps)</div>
   <div><b>W A S D / arrows</b> pan camera</div>
   <div><b>F</b> focus selected part</div>
   <div><b>Delete</b> / Trash = delete part</div>
@@ -66,7 +90,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#7fb4e6;fon
   <div><b>U H J K</b> old movement (if on)</div>
   <div><b>Pose</b> pose the limbs (while running)</div>
   <button class="btn" id="uhjkBtn" type="button">UHJK movement: OFF</button>
-  <button class="btn" id="studBtn" type="button">Studs: Flat (2D)</button>
+  <button class="btn" id="studBtn" type="button">Studs: Blocky (3D)</button>
 </div>
 
 <div id="posePanel" class="panel">
@@ -118,7 +142,7 @@ renderer.setPixelRatio(Math.min(win.devicePixelRatio||1,1.5));
 renderer.domElement.id='view';
 doc.body.insertBefore(renderer.domElement,doc.body.firstChild);   /* no shadows anywhere */
 var canvas=renderer.domElement;
-var hud=$('hud'),hctx=hud.getContext('2d');
+var hud=$('hud'),hctx=hud.getContext('2d'),snapFx=$('snapFx');
 var scene=new THREE.Scene();
 var camera=new THREE.PerspectiveCamera(70,1,.2,900);
 (function(){
@@ -134,8 +158,8 @@ scene.add(sun);
 
 /* ---------- state ---------- */
 var VW=800,VH=450;
-var parts=[],selected=null,tool='select',running=false,uhjk=false,flatStuds=true;
-var yaw=.7,pitch=.55,camDist=30,focus=[0,1,0],saved=null;
+var parts=[],selected=null,tool='select',running=false,uhjk=false,flatStuds=false;
+var yaw=.7,pitch=.55,camDist=30,camDistT=30,snapT=0,lastSnapSnd=0,focus=[0,1,0],saved=null;
 var keys={};
 var pos={x:0,y:0,z:0},vy=0,facing=0,grounded=false;
 var R=1,CH=5.8,STEP=1.05,GRAV=90,WALK=14,TURN=2.4;
@@ -149,6 +173,18 @@ var hudHad=false;
 var song=new Audio('Assets/SFX/song.mp3');
 song.loop=true;song.preload='auto';
 song.addEventListener('error',function(){say('Could not load Assets/SFX/song.mp3 (put it next to this .html)');});
+/* short sound effects: small pools of Audio elements so quick repeats can overlap */
+function makeSfx(src,n){
+  var pool=[],i=0,k;
+  for(k=0;k<n;k++){var a=new Audio(src);a.preload='auto';pool.push(a);}
+  return function(){
+    var a=pool[i++%n];
+    try{a.currentTime=0;var pr=a.play();if(pr&&pr.catch)pr.catch(function(){});}catch(e){}
+  };
+}
+var sfxArrow=makeSfx('Assets/SFX/arrow.wav',6);
+var sfxSnap=makeSfx('Assets/SFX/camsnap.wav',3);
+var sfxDelete=makeSfx('Assets/SFX/delete.wav',2);
 
 /* ---------- parts ---------- */
 var boxGeo=new THREE.BoxGeometry(1,1,1);
@@ -165,7 +201,7 @@ function buildStuds(p){
     scene.add(p.studs);
   }
   p.studs.count=need;
-  var h=flatStuds?.04:.3,S=.6,y=p.mx[1]+h/2,arr=p.studs.instanceMatrix.array,idx=0,i,j,b;
+  var h=flatStuds?.04:.5,S=.6,y=p.mx[1]+h/2,arr=p.studs.instanceMatrix.array,idx=0,i,j,b;
   for(i=0;i<p.sx;i++){
     var x=p.mn[0]+i+.5;
     for(j=0;j<p.sz;j++){
@@ -185,11 +221,16 @@ function refresh(p){
   p.mesh.scale.set(p.sx,p.sy,p.sz);
   buildStuds(p);
 }
+function setStudColor(p){
+  p.studMat.color.set(p.col);
+  if(flatStuds)p.studMat.color.lerp(WHITE,.2);   /* flat studs need a lighter tone to be visible */
+}
 function addPart(cx,cy,cz,sx,sy,sz,col,fixed){
   var p={x:cx,y:cy,z:cz,sx:sx,sy:sy,sz:sz,fixed:!!fixed,studs:null,cap:0};
   p.mat=new THREE.MeshLambertMaterial({color:col});
-  var sc=new THREE.Color(col).lerp(WHITE,.2);
-  p.studMat=new THREE.MeshLambertMaterial({color:sc});
+  p.col=col;
+  p.studMat=new THREE.MeshLambertMaterial({color:col});
+  setStudColor(p);
   p.mesh=new THREE.Mesh(boxGeo,p.mat);
   p.mesh.userData.part=p;
   scene.add(p.mesh);
@@ -432,7 +473,7 @@ function spawn(){
   for(var i=0;i<parts.length;i++){var p=parts[i];
     if(Math.abs(p.x)<p.sx/2+R&&Math.abs(p.z)<p.sz/2+R&&p.mx[1]>top)top=p.mx[1];}
   pos.x=0;pos.z=0;pos.y=top+.05;vy=0;facing=0;grounded=false;
-  yaw=facing+Math.PI;pitch=.3;camDist=16;
+  yaw=facing+Math.PI;pitch=.3;camDist=camDistT=16;
 }
 function physics(dt,fwd){
   var sp=fwd*WALK,sf=Math.sin(facing),cf=Math.cos(facing),i,p;
@@ -478,7 +519,7 @@ function update(dt){
 function setTool(t){
   tool=t;
   var b=doc.querySelectorAll('[data-tool]');
-  for(var i=0;i<b.length;i++)b[i].className='btn'+(b[i].getAttribute('data-tool')===t?' active':'');
+  for(var i=0;i<b.length;i++)b[i].classList.toggle('active',b[i].getAttribute('data-tool')===t);
 }
 function insertPart(){
   if(running)return;
@@ -492,8 +533,15 @@ function insertPart(){
 function deleteSelected(){
   if(running)return;
   if(!selected){say('Select a part first, then click Trash.');return;}
-  if(!selected.fixed){removePart(selected);say('Part deleted.');}
+  if(!selected.fixed){removePart(selected);sfxDelete();say('Part deleted.');}
   selected=null;drag=null;
+}
+function duplicateSelected(){
+  if(running)return;
+  if(!selected){say('Select a part first, then click Duplicate.');return;}
+  var o=selected;
+  selected=addPart(o.x+o.sx,o.y,o.z,o.sx,o.sy,o.sz,o.col,false);   /* copy goes right next to the original */
+  say('Part duplicated.');
 }
 function setLimb(id){
   poseSel=id;
@@ -513,7 +561,7 @@ function setPose(v){
   if(v&&!running)return;
   poseOn=v;drag=null;hoverKey=-1;
   $('posePanel').style.display=v?'block':'none';
-  $('poseBtn').className='btn'+(v?' active':(running?'':' off'));
+  $('poseBtn').classList.toggle('active',v);$('poseBtn').classList.toggle('off',!running);
   highlightLimb();
   if(v)setLimb(poseSel);
   else if(running)say('Running - W/S move, A/D turn.');
@@ -522,13 +570,13 @@ function setRun(v){
   if(v===running)return;
   if(!v&&poseOn)setPose(false);
   running=v;
-  $('runBtn').className='btn'+(v?' on':'');
-  $('runBtn').textContent=v?'Stop':'Run';
-  $('tools').className=v?'running':'';
-  $('poseBtn').className='btn'+(v?'':' off');
+  $('runBtn').classList.toggle('on',v);
+  $('runBtn').title=v?'Stop':'Run';
+  $('menuL').classList.toggle('running',v);
+  $('poseBtn').classList.toggle('off',!v);
   charRoot.visible=v;
   if(v){
-    saved={yaw:yaw,pitch:pitch,camDist:camDist};
+    saved={yaw:yaw,pitch:pitch,camDist:camDistT};
     selected=null;drag=null;hoverKey=-1;
     spawn();
     try{song.currentTime=0;}catch(e){}
@@ -537,13 +585,15 @@ function setRun(v){
     say('Running - W/S move, A/D turn. Click Pose to pose the limbs.');
   }else{
     try{song.pause();song.currentTime=0;}catch(e2){}
-    if(saved){yaw=saved.yaw;pitch=saved.pitch;camDist=saved.camDist;}
+    if(saved){yaw=saved.yaw;pitch=saved.pitch;camDist=camDistT=saved.camDist;}
     say('Stopped.');
   }
 }
 function wire(id,fn){var el=$(id);el.addEventListener('click',function(){fn();el.blur();});}
 wire('partBtn',insertPart);
 wire('trashBtn',deleteSelected);
+wire('dupBtn',duplicateSelected);
+wire('menuBtn',function(){var i=$('info');i.style.display=(i.style.display==='none')?'block':'none';});
 wire('runBtn',function(){setRun(!running);});
 wire('poseBtn',function(){setPose(!poseOn);});
 wire('toolSelect',function(){setTool('select');});
@@ -553,7 +603,7 @@ wire('uhjkBtn',function(){uhjk=!uhjk;$('uhjkBtn').textContent='UHJK movement: '+
 wire('studBtn',function(){
   flatStuds=!flatStuds;
   $('studBtn').textContent='Studs: '+(flatStuds?'Flat (2D)':'Blocky (3D)');
-  for(var i=0;i<parts.length;i++)buildStuds(parts[i]);
+  for(var i=0;i<parts.length;i++){setStudColor(parts[i]);buildStuds(parts[i]);}
 });
 wire('pmMove',function(){setPoseMode('move');});
 wire('pmRot',function(){setPoseMode('rot');});
@@ -599,7 +649,8 @@ canvas.addEventListener('mousedown',function(e){
     if(h){
       var s=selected,L=h.L;
       drag={kind:'build',key:h.key,a:h.a,s:h.s,vx:(h.st[0]-h.sf[0])/L,vy:(h.st[1]-h.sf[1])/L,mx:mx,my:my,
-            st:{x:s.x,y:s.y,z:s.z,sx:s.sx,sy:s.sy,sz:s.sz}};
+            st:{x:s.x,y:s.y,z:s.z,sx:s.sx,sy:s.sy,sz:s.sz},
+            lastVal:(tool==='move'?[s.x,s.y,s.z][h.a]:[s.sx,s.sy,s.sz][h.a])};
     }
   }
 });
@@ -645,6 +696,11 @@ win.addEventListener('mousemove',function(e){
       s[CN[a]]=S[CN[a]]+sg*(ns-S[SN[a]])/2;
     }
     refresh(s);
+    var curV=(tool==='move')?s[CN[a]]:s[SN[a]],stp=Math.round(Math.abs(curV-drag.lastVal));
+    if(stp>0){
+      drag.lastVal=curV;
+      for(var q=0;q<Math.min(stp,4);q++){if(q===0)sfxArrow();else setTimeout(sfxArrow,q*30);}
+    }
     say('Part  pos '+s.x+', '+s.y+', '+s.z+'  size '+s.sx+' x '+s.sy+' x '+s.sz);
     return;
   }
@@ -675,7 +731,13 @@ win.addEventListener('mouseup',function(e){
   }
 });
 canvas.addEventListener('wheel',function(e){
-  camDist=clamp(camDist*Math.exp(e.deltaY*(e.deltaMode===1?33:1)*.001),4,140);
+  var d=e.deltaY*(e.deltaMode===1?33:1),old=camDistT;
+  camDistT=clamp(camDistT*Math.exp(d*.001),4,140);
+  if(d<0&&camDistT<old-1e-6){            /* zooming IN: snap effect + sound */
+    snapT=1;
+    var now=performance.now();
+    if(now-lastSnapSnd>110){lastSnapSnd=now;sfxSnap();}
+  }
   e.preventDefault();
 },{passive:false});
 
@@ -689,6 +751,12 @@ function frame(){
   last=t;if(dt<=0)dt=.001;
   try{
     update(dt);
+    camDist+=(camDistT-camDist)*(1-Math.exp(-dt*16));
+    if(Math.abs(camDistT-camDist)<.001)camDist=camDistT;
+    snapT=Math.max(0,snapT-dt*4.5);
+    var fv=70-9*snapT*snapT;                 /* quick FOV punch that relaxes back */
+    if(Math.abs(camera.fov-fv)>.001){camera.fov=fv;camera.updateProjectionMatrix();}
+    snapFx.style.opacity=(snapT*.55).toFixed(3);
     charRoot.position.set(pos.x,pos.y,pos.z);
     charRoot.rotation.y=facing;
     updateCamera();
