@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Parrot Cay - Dynablocks-like (three.js v3)</title>
+<title>Parrot Cay - Dynablocks-like (three.js v5)</title>
 <style>
 *{box-sizing:border-box}
 html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#7fb4e6;font-family:Tahoma,Verdana,Arial,sans-serif;-webkit-user-select:none;user-select:none}
@@ -22,15 +22,15 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#7fb4e6;fon
 .panel b{display:inline-block;min-width:78px}
 .panel .btn{margin:4px 0 0;height:24px;line-height:18px}
 .panel .btn.active{line-height:22px}
-#info{right:8px;top:8px;width:250px;display:none}
+#info{right:204px;top:44px;width:200px;display:none}
 #info.show{display:block}
-#posePanel{right:8px;bottom:8px;width:250px;display:none}
+#posePanel{right:204px;bottom:8px;width:250px;display:none}
 #posePanel .row{display:flex;gap:4px}
 #posePanel .row .btn{margin-top:4px}
-#status{position:fixed;left:142px;bottom:8px;padding:4px 8px;background:#d4d0c8;border:2px solid;border-color:#404040 #fff #fff #404040;font-size:11px;color:#000;z-index:5;max-width:calc(100% - 430px)}
+#status{position:fixed;left:142px;bottom:8px;padding:4px 8px;background:#d4d0c8;border:2px solid;border-color:#404040 #fff #fff #404040;font-size:11px;color:#000;z-index:5;max-width:calc(100% - 380px)}
 
 /* ---- left menu (matches UI.png) ---- */
-#menuL{position:fixed;left:8px;top:8px;width:116px;padding:12px 0 8px;background:#a59cbc;border:6px solid #4f86bd;z-index:5;text-align:center;font-family:'Segoe UI',Tahoma,Arial,sans-serif}
+#menuL{position:fixed;left:8px;top:44px;width:116px;padding:12px 0 8px;background:#a59cbc;border:6px solid #4f86bd;z-index:5;text-align:center;font-family:'Segoe UI',Tahoma,Arial,sans-serif}
 .ibtn{display:block;margin:0 auto;padding:0;border:0;background:none;border-radius:50%;cursor:pointer;outline:none;position:relative}
 .ibtn img{display:block;width:100%;height:100%;pointer-events:none;-webkit-user-drag:none;user-select:none}
 .ibtn span{display:none}
@@ -63,8 +63,74 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#7fb4e6;fon
 .sf:nth-child(5){transform:rotateX(90deg) translateZ(-800px)}
 .sf:nth-child(6){transform:rotateX(-90deg) translateZ(-800px)}
 /* ---- custom mouse cursor (Assets/Icons/mouse.png) ---- */
-#cursorImg{position:fixed;left:0;top:0;width:32px;height:32px;object-fit:contain;object-position:left top;pointer-events:none;z-index:9999;display:none;will-change:transform}
+#cursorImg{position:fixed;left:0;top:0;width:48px;height:48px;object-fit:contain;object-position:left top;pointer-events:none;z-index:9999;display:none;will-change:transform}
 html.mc,html.mc *{cursor:none !important}
+
+/* ---- top menu bar: invisible buttons, only the text shows ---- */
+#topbar{position:fixed;left:0;top:0;height:32px;z-index:6;display:flex;padding-left:17px;pointer-events:none}
+.tm{pointer-events:auto;background:none;border:0;color:#f3f0fb;font:600 16px 'Segoe UI',Tahoma,Arial,sans-serif;width:108px;text-align:left;padding:0;height:32px;cursor:pointer;outline:none;text-shadow:0 1px 1px rgba(0,0,0,.7)}
+.tm:hover{text-decoration:underline}
+.dd{position:fixed;display:none;z-index:7;background:#d4d0c8;border:2px solid;border-color:#fff #404040 #404040 #fff;padding:2px;min-width:250px}
+.dd.show{display:block}
+.dd button{display:block;width:100%;text-align:left;background:none;border:0;padding:5px 12px;font:12px Tahoma,Arial,sans-serif;color:#000;cursor:pointer;outline:none}
+.dd button:hover{background:#0a246a;color:#fff}
+.ddsep{height:1px;background:#808080;margin:3px 2px}
+/* ---- classic windows (Toolbox, Help) ---- */
+.win{position:fixed;display:none;z-index:8;background:#d4d0c8;border:2px solid;border-color:#fff #404040 #404040 #fff;color:#000;font:12px Tahoma,Arial,sans-serif}
+.win.show{display:block}
+.wtitle{background:linear-gradient(90deg,#0a246a,#a6caf0);color:#fff;font-weight:bold;padding:3px 4px 3px 8px;display:flex;justify-content:space-between;align-items:center}
+.wx{width:18px;height:16px;padding:0;background:#d4d0c8;border:2px solid;border-color:#fff #404040 #404040 #fff;font:bold 10px Tahoma,Arial,sans-serif;line-height:10px;cursor:pointer;color:#000}
+.wbody{padding:10px;line-height:1.5}
+#toolbox{left:140px;top:60px;width:230px}
+#tbList{max-height:280px;overflow-y:auto;margin-bottom:6px}
+#tbList .btn{margin:0 0 4px;height:26px;line-height:20px}
+#tbNote{font-size:11px;color:#600;margin-bottom:6px}
+#helpWin{left:50%;top:50%;transform:translate(-50%,-50%);width:560px;max-width:94%}
+#helpWin .wbody{max-height:70vh;overflow-y:auto}
+#helpWin h3{margin:8px 0 2px;font-size:12px}
+#helpWin code{background:#fff;padding:0 3px;border:1px solid #999}
+#helpWin pre{background:#fff;border:1px solid #999;padding:6px;margin:4px 0;font-size:11px;overflow-x:auto}
+/* ---- right menu (matches the DynaBlocks screenshot) ---- */
+#menuR{position:fixed;right:8px;top:44px;width:184px;height:468px;max-height:calc(100% - 52px);padding:8px 8px 10px;background:#7b8a9c;border:6px solid #c3d0e8;box-shadow:inset 0 0 0 2px #56657a;z-index:5;display:flex;flex-direction:column;align-items:center;gap:8px}
+#logo{font:bold 26px 'Trebuchet MS','Arial Rounded MT Bold',Arial,sans-serif;letter-spacing:0;text-shadow:1px 1px 0 rgba(0,0,0,.35);white-space:nowrap;line-height:34px;user-select:none}
+.qbtn{width:68px;height:68px;border-radius:50%;border:3px solid #6f7378;background:radial-gradient(circle at 50% 25%,#fffdb0 0%,#f3e63c 45%,#d8c818 100%);box-shadow:0 0 0 2px #c9c9c9;cursor:pointer;outline:none;padding:0;font:bold 44px 'Arial Black',Arial,sans-serif;color:#111;line-height:60px}
+.qbtn:hover,.rbtn:hover,.zbtn:hover,.pbtn:hover{filter:brightness(1.12)}
+.rbtn{width:136px;height:30px;border:2px solid #aeb8c4;border-radius:8px;background:linear-gradient(#b4d4f2,#6a9ccc 55%,#86b4de);color:#3d6f9f;font:bold 17px 'Arial Narrow','Segoe UI',Arial,sans-serif;letter-spacing:.5px;text-shadow:0 1px 0 rgba(255,255,255,.55);cursor:pointer;outline:none;padding:0}
+.zrow{display:flex;justify-content:space-between;width:100%;padding:4px 6px 0}
+.zbtn,.pbtn{background:none;border:0;padding:0;cursor:pointer;outline:none}
+.zbtn svg,.pbtn svg{display:block}
+.prow{display:flex;justify-content:space-between;align-items:flex-end;width:100%;margin-top:14px;padding:0 2px}
+.pbtn.off{opacity:.4;pointer-events:none}
+.pbtn.on{filter:drop-shadow(0 0 3px #fff)}
+.cbox{margin-top:auto;width:100%;background:#dcdcdc;border:1px solid #9a9a9a;padding:4px 4px}
+.cbox button{display:block;width:100%;background:none;border:0;text-align:left;padding:5px 6px;font:17px 'Segoe UI',Tahoma,Arial,sans-serif;color:#111;cursor:pointer;outline:none}
+.cbox button:hover{background:#c4c8d6}
+
+/* ---- right menu icons: Assets/Icons/*.png (1000x1000), drawn art shows if a png is missing ---- */
+.rimg{position:relative;display:block;padding:0;border:0;background:none;cursor:pointer;outline:none;flex:none}
+.rimg .fb{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)}
+.rimg .ri{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:none;pointer-events:none;-webkit-user-drag:none;user-select:none}
+.rimg.hasimg .ri{display:block}
+.rimg.hasimg .fb{display:none}
+.rimg:hover{filter:brightness(1.12)}
+.fb.qbtn{display:block;text-align:center}
+.fb.rbtn{display:block;text-align:center;line-height:26px;box-sizing:border-box}
+#logo{width:172px;height:44px;cursor:default}
+#logo:hover{filter:none}
+#logo .ri{width:172px;height:172px}
+#helpBtn{width:72px;height:72px}
+#helpBtn .ri{width:72px;height:72px}
+#resetBtn{width:150px;height:40px}
+#resetBtn .ri{width:150px;height:150px}
+.zbtn{width:56px;height:56px}
+.zbtn .ri{width:56px;height:56px}
+.pbtn{width:54px;height:92px}
+.pbtn .ri{width:92px;height:92px;top:auto;bottom:0;transform:translateX(-50%)}
+.pbtn .fb{top:auto;bottom:0;transform:translateX(-50%)}
+/* ---- Timer / Score (shown while running) ---- */
+#hudStats{position:fixed;right:212px;top:38px;z-index:4;text-align:right;pointer-events:none;display:none;font:bold 30px/34px 'Arial Narrow','Segoe UI',Arial,sans-serif;letter-spacing:.5px;color:#8fd020;
+  text-shadow:-2px -2px 0 #1d3a05,2px -2px 0 #1d3a05,-2px 2px 0 #1d3a05,2px 2px 0 #1d3a05,0 3px 0 #1d3a05,0 -2px 0 #1d3a05}
+#hudStats.show{display:block}
 </style>
 </head>
 <body>
@@ -90,21 +156,84 @@ html.mc,html.mc *{cursor:none !important}
 </div>
 
 <div id="info" class="panel">
-  <h1>Parrot Cay - Dynablocks-like</h1>
-  <div><b>Build mode</b></div>
-  <div><b>Right-drag</b> rotate camera</div>
-  <div><b>Wheel</b> zoom (stepped, with a snap)</div>
-  <div><b>W A S D / arrows</b> pan camera</div>
-  <div><b>F</b> focus selected part</div>
-  <div><b>Delete</b> / Trash = delete part</div>
-  <div style="margin-top:3px"><b>Run mode</b></div>
-  <div><b>W / S</b> forward / backward</div>
-  <div><b>A / D</b> turn left / right</div>
-  <div><b>Arrows</b> same as WASD</div>
-  <div><b>U H J K</b> old movement (if on)</div>
-  <div><b>Pose</b> pose the limbs (while running)</div>
+  <h1>Options</h1>
   <button class="btn" id="uhjkBtn" type="button">UHJK movement: OFF</button>
   <button class="btn" id="studBtn" type="button">Studs: Blocky (3D)</button>
+</div>
+
+<div id="topbar">
+  <button class="tm" id="mFile" type="button">File</button>
+  <button class="tm" id="mEdit" type="button">Edit</button>
+  <button class="tm" id="mView" type="button">View</button>
+  <button class="tm" id="mInsert" type="button">Insert</button>
+  <button class="tm" id="mFormat" type="button">Format</button>
+</div>
+<div id="fileMenu" class="dd">
+  <button type="button" data-act="new">New Baseplate</button>
+  <div class="ddsep"></div>
+  <button type="button" data-act="save">Save Map (.json)</button>
+  <button type="button" data-act="incbase">[x] Include baseplate when saving</button>
+  <button type="button" data-act="load">Load Map (.json)...</button>
+</div>
+<input type="file" id="fileIn" accept=".json,application/json" style="display:none">
+<input type="file" id="modelIn" accept=".json,application/json" multiple style="display:none">
+
+<div id="menuR">
+  <div id="logo" class="rimg"><img class="ri" src="Assets/Icons/dynablocks.png" alt="" draggable="false" onload="this.parentNode.classList.add('hasimg')" onerror="this.remove()"><span class="fb"><span style="color:#e8266a">D</span><span style="color:#5a9a0a">y</span><span style="color:#2b3fd0">n</span><span style="color:#f08a30">a</span><span style="color:#b5c21a">B</span><span style="color:#a23fa8">l</span><span style="color:#8fd3e3">o</span><span style="color:#e8a020">c</span><span style="color:#c03f78">k</span><span style="color:#4c9a2a">s</span></span></div>
+  <button class="rimg" id="helpBtn" type="button" title="Help"><img class="ri" src="Assets/Icons/help.png" alt="" draggable="false" onload="this.parentNode.classList.add('hasimg')" onerror="this.remove()"><span class="fb qbtn">?</span></button>
+  <button class="rimg" id="resetBtn" type="button" title="Reset game"><img class="ri" src="Assets/Icons/reset.png" alt="" draggable="false" onload="this.parentNode.classList.add('hasimg')" onerror="this.remove()"><span class="fb rbtn">RESET GAME</span></button>
+  <div class="zrow">
+    <button class="rimg zbtn" id="zoomInBtn" type="button" title="Zoom in"><img class="ri" src="Assets/Icons/plus.png" alt="" draggable="false" onload="this.parentNode.classList.add('hasimg')" onerror="this.remove()"><span class="fb"><svg viewBox="0 0 44 44" width="44" height="44" shape-rendering="crispEdges"><line x1="28" y1="28" x2="41" y2="41" stroke="#000" stroke-width="9"/><line x1="28" y1="28" x2="41" y2="41" stroke="#2b4fe0" stroke-width="5.5"/><line x1="29" y1="29" x2="40" y2="40" stroke="#9fb4ff" stroke-width="1.5" stroke-dasharray="2 3"/><circle cx="18" cy="18" r="14" fill="#eef1f7" stroke="#000" stroke-width="3"/><rect x="10" y="16" width="16" height="4" fill="#8b0000"/><rect x="16" y="10" width="4" height="16" fill="#8b0000"/></svg></span></button>
+    <button class="rimg zbtn" id="zoomOutBtn" type="button" title="Zoom out"><img class="ri" src="Assets/Icons/minus.png" alt="" draggable="false" onload="this.parentNode.classList.add('hasimg')" onerror="this.remove()"><span class="fb"><svg viewBox="0 0 44 44" width="44" height="44" shape-rendering="crispEdges"><line x1="28" y1="28" x2="41" y2="41" stroke="#000" stroke-width="9"/><line x1="28" y1="28" x2="41" y2="41" stroke="#2b4fe0" stroke-width="5.5"/><line x1="29" y1="29" x2="40" y2="40" stroke="#9fb4ff" stroke-width="1.5" stroke-dasharray="2 3"/><circle cx="18" cy="18" r="14" fill="#eef1f7" stroke="#000" stroke-width="3"/><rect x="10" y="16" width="16" height="4" fill="#8b0000"/></svg></span></button>
+  </div>
+  <div class="prow">
+    <button class="rimg pbtn off" id="sitBtn" type="button" title="Sit"><img class="ri" src="Assets/Icons/sit.png" alt="" draggable="false" onload="this.parentNode.classList.add('hasimg')" onerror="this.remove()"><span class="fb"><svg viewBox="0 0 44 44" height="40" shape-rendering="crispEdges"><circle cx="13" cy="9" r="5" fill="#ffee00" stroke="#000" stroke-width="1.5"/><rect x="5" y="15" width="14" height="22" fill="#bdbdbd" stroke="#000" stroke-width="2"/><rect x="9" y="19" width="5" height="14" fill="#9d9d9d" stroke="#555" stroke-width="1.5"/><rect x="22" y="32" width="19" height="5" fill="#bdbdbd" stroke="#000" stroke-width="2"/></svg></span></button>
+    <button class="rimg pbtn off" id="standBtn" type="button" title="Stand up"><img class="ri" src="Assets/Icons/stand.png" alt="" draggable="false" onload="this.parentNode.classList.add('hasimg')" onerror="this.remove()"><span class="fb"><svg viewBox="0 0 52 58" height="58" shape-rendering="crispEdges"><circle cx="26" cy="8" r="6" fill="#ffee00" stroke="#000" stroke-width="1.5"/><rect x="14" y="16" width="24" height="22" fill="#bdbdbd" stroke="#000" stroke-width="2"/><rect x="8" y="17" width="6" height="16" fill="#bdbdbd" stroke="#000" stroke-width="2"/><rect x="38" y="17" width="6" height="16" fill="#bdbdbd" stroke="#000" stroke-width="2"/><rect x="17" y="38" width="7" height="14" fill="#bdbdbd" stroke="#000" stroke-width="2"/><rect x="28" y="38" width="7" height="14" fill="#bdbdbd" stroke="#000" stroke-width="2"/><rect x="6" y="54" width="40" height="3" fill="#0a7a0a"/></svg></span></button>
+    <button class="rimg pbtn off" id="ladderBtn" type="button" title="Climb the nearest ladder"><img class="ri" src="Assets/Icons/climb.png" alt="" draggable="false" onload="this.parentNode.classList.add('hasimg')" onerror="this.remove()"><span class="fb"><svg viewBox="0 0 40 74" height="100" shape-rendering="crispEdges"><g fill="#ff8a40"><rect x="5" y="0" width="3" height="74"/><rect x="32" y="0" width="3" height="74"/><rect x="5" y="3" width="30" height="3"/><rect x="5" y="12" width="30" height="3"/><rect x="5" y="60" width="30" height="3"/><rect x="5" y="69" width="30" height="3"/></g><circle cx="21" cy="21" r="5" fill="#ffee00" stroke="#000" stroke-width="1.5"/><rect x="11" y="27" width="20" height="17" fill="#bdbdbd" stroke="#000" stroke-width="2"/><rect x="7" y="17" width="5" height="16" fill="#bdbdbd" stroke="#000" stroke-width="2"/><rect x="13" y="44" width="6" height="14" fill="#bdbdbd" stroke="#000" stroke-width="2"/><rect x="22" y="44" width="6" height="14" fill="#bdbdbd" stroke="#000" stroke-width="2"/></svg></span></button>
+  </div>
+  <div class="cbox">
+    <button type="button" id="commentBtn">Comment</button>
+    <button type="button" id="bugBtn">Report a bug</button>
+  </div>
+</div>
+
+<div id="hudStats"><div id="timerTxt">Timer: 60.0</div><div id="scoreTxt">Score: 0</div></div>
+
+<div id="toolbox" class="win">
+  <div class="wtitle"><span>Toolbox</span><button class="wx" id="tbClose" type="button">X</button></div>
+  <div class="wbody">
+    <div id="tbList"></div>
+    <div id="tbNote"></div>
+    <button class="btn" id="tbLoad" type="button">Load model .json...</button>
+  </div>
+</div>
+
+<div id="helpWin" class="win">
+  <div class="wtitle"><span>Help</span><button class="wx" id="helpClose" type="button">X</button></div>
+  <div class="wbody">
+    <h3>Building</h3>
+    <div><b>Right-drag</b> orbit the camera, <b>wheel</b> zoom, <b>W A S D / arrows</b> pan, <b>F</b> focus the selected part, <b>Delete</b> removes it.<br>
+    <b>Select / Move / Scale</b> edit one part (parts that belong to a model move, delete and duplicate together). <b>Insert Part</b> adds a brick, <b>Duplicate</b> copies the selection.</div>
+    <h3>Running</h3>
+    <div>Press <b>Go</b> to spawn Parrot Cay (the song plays), <b>Stop</b> to go back to building.<br>
+    <b>W / S</b> forward / back, <b>A / D</b> turn, arrow keys work too, and <b>U H J K</b> if you turn that on in MENU. <b>Pose</b> lets you position and rotate the limbs.<br>The <b>Timer</b> counts down from 60 while you run and resets when you stop. <b>Score</b> does nothing yet; it is there for models that need it.</div>
+    <h3>Right panel</h3>
+    <div><b>?</b> this window. <b>RESET GAME</b> respawns the character. The magnifiers zoom in (+) and out (&minus;).<br>
+    The small figures: <b>sit</b>, <b>stand up</b> (you can only walk while standing) and <b>climb the nearest ladder</b>, which carries you up to the platform beside it.</div>
+    <h3>Menu bar</h3>
+    <div><b>File</b>: New Baseplate, Save / Load a map as .json (you can leave the baseplate out when saving; loading a map without one keeps your current baseplate).<br>
+    <b>Insert</b>: opens the Toolbox. It lists the built-in Ladder and every <code>.json</code> in <code>Assets/Models</code>.</div>
+    <h3>Making models</h3>
+    <div>A model is a <code>.json</code> file like a saved map, so the easiest way is to build it here and use <b>File &gt; Save Map</b>. By hand:</div>
+<pre>{ "name": "My model",
+  "parts": [
+    { "x":0, "y":0.5, "z":0, "sx":4, "sy":1, "sz":2, "color":"#c4281c" },
+    { "x":0, "y":6, "z":0, "sx":1, "sy":12, "sz":1, "color":"#da8541", "role":"ladder" },
+    { "x":0, "y":11.5, "z":-2.5, "sx":4, "sy":1, "sz":4, "color":"#a3a2a5", "role":"platform" }
+  ] }</pre>
+    <div><code>x y z</code> is the centre of a part, <code>sx sy sz</code> its size. Parts with <code>"role":"ladder"</code> can be climbed; the part with <code>"role":"platform"</code> is where you end up (you climb from the side opposite the platform).<br>
+    Browsers can only read the Models folder when the page is served, e.g. run <code>py -m http.server 8000</code> in this folder and open <code>http://localhost:8000</code>. Opened by double-click, use <b>Load model .json...</b> in the Toolbox instead.</div>
+  </div>
 </div>
 
 <div id="posePanel" class="panel">
@@ -144,7 +273,7 @@ var statusEl=$('status');
 function say(t){statusEl.textContent=t;}
 /* mouse.png is drawn by us (not CSS cursor) so any image size works; hotspot = top-left corner */
 (function(){
-  var cur=$('cursorImg'),root=doc.documentElement,CURSOR_PX=32;
+  var cur=$('cursorImg'),root=doc.documentElement,CURSOR_PX=48;
   cur.style.width=cur.style.height=CURSOR_PX+'px';
   win.addEventListener('mousemove',function(e){
     if(!root.classList.contains('mc'))return;
@@ -182,7 +311,7 @@ var parts=[],selected=null,tool='select',running=false,uhjk=false,flatStuds=fals
 var yaw=.7,pitch=.55,camDist=30,camDistT=30,fovK=0,lastSnapFx=0,zoomAcc=0,focus=[0,1,0],saved=null;
 var keys={};
 var pos={x:0,y:0,z:0},vy=0,facing=0,grounded=false;
-var R=1,CH=5.8,STEP=1.05,GRAV=90,WALK=14,TURN=2.4;
+var R=1,CH=6.4,STEP=1.05,GRAV=90,WALK=14,TURN=2.4;
 var drag=null,hoverKey=-1;
 var PALETTE=[0xc4281c,0x0d69ac,0xf5cd30,0x287f47,0xda8541,0xa3a2a5,0x8f49b5,0x20a6a6];
 var palIdx=0;
@@ -212,7 +341,8 @@ var studGeo=new THREE.BoxGeometry(1,1,1);
 var WHITE=new THREE.Color(0xffffff);
 
 function buildStuds(p){
-  var need=p.sx*p.sz;
+  var nx=Math.floor(p.sx+1e-6),nz=Math.floor(p.sz+1e-6),need=nx*nz;
+  if(need<1){if(p.studs)p.studs.count=0;return;}
   if(!p.studs||p.cap<need){
     if(p.studs)scene.remove(p.studs);
     p.cap=Math.max(need,64);
@@ -221,10 +351,10 @@ function buildStuds(p){
     scene.add(p.studs);
   }
   p.studs.count=need;
-  var h=flatStuds?.04:.5,S=.6,y=p.mx[1]+h/2,arr=p.studs.instanceMatrix.array,idx=0,i,j,b;
-  for(i=0;i<p.sx;i++){
+  var h=flatStuds?.04:.34,S=.6,y=p.mx[1]+h/2,arr=p.studs.instanceMatrix.array,idx=0,i,j,b;
+  for(i=0;i<nx;i++){
     var x=p.mn[0]+i+.5;
-    for(j=0;j<p.sz;j++){
+    for(j=0;j<nz;j++){
       b=idx*16;idx++;
       arr[b]=S;arr[b+1]=0;arr[b+2]=0;arr[b+3]=0;
       arr[b+4]=0;arr[b+5]=h;arr[b+6]=0;arr[b+7]=0;
@@ -245,8 +375,9 @@ function setStudColor(p){
   p.studMat.color.set(p.col);
   if(flatStuds)p.studMat.color.lerp(WHITE,.2);   /* flat studs need a lighter tone to be visible */
 }
-function addPart(cx,cy,cz,sx,sy,sz,col,fixed){
-  var p={x:cx,y:cy,z:cz,sx:sx,sy:sy,sz:sz,fixed:!!fixed,studs:null,cap:0};
+var groupSeq=1;
+function addPart(cx,cy,cz,sx,sy,sz,col,fixed,extra){
+  var p={x:cx,y:cy,z:cz,sx:sx,sy:sy,sz:sz,fixed:!!fixed,studs:null,cap:0,role:(extra&&extra.role)||null,group:(extra&&extra.group)||0};
   p.mat=new THREE.MeshLambertMaterial({color:col});
   p.col=col;
   p.studMat=new THREE.MeshLambertMaterial({color:col});
@@ -279,7 +410,7 @@ var LIMBS={
 var charRoot=new THREE.Group();charRoot.visible=false;scene.add(charRoot);
 var limbG={},pose={},charPick=[];
 (function(){
-  var YEL=0xf5cd30,RED=0xc4281c,WHT=0xf2f3f3,id;
+  var YEL=0xf7d117,BLU=0x0d69ac,GRY=0x9a9ea3,id;
   for(id in LIMBS){
     var g=new THREE.Group();g.position.set(LIMBS[id].piv[0],LIMBS[id].piv[1],LIMBS[id].piv[2]);
     charRoot.add(g);limbG[id]=g;
@@ -289,20 +420,21 @@ var limbG={},pose={},charPick=[];
     var pv=LIMBS[id].piv,m=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz),new THREE.MeshLambertMaterial({color:col}));
     m.position.set(cx-pv[0],cy-pv[1],cz-pv[2]);m.userData.limb=id;limbG[id].add(m);charPick.push(m);
   }
-  box('legR',-.5,1,0,1,2,1,RED);
-  box('legL',.5,1,0,1,2,1,RED);
-  box('torso',0,2.5,0,2,1,1,WHT);
-  box('torso',0,3.5,0,2,1,1,RED);
+  box('legR',-.5,1,0,1,2,1,BLU);
+  box('legL',.5,1,0,1,2,1,BLU);
+  box('torso',0,2.5,0,2,1,1,GRY);
+  box('torso',0,3.5,0,2,1,1,BLU);
   box('armR',-1.5,3,0,1,2,1,YEL);
   box('armL',1.5,3,0,1,2,1,YEL);
-  var hp=LIMBS.head.piv,head=new THREE.Mesh(new THREE.SphereGeometry(.9,40,28),new THREE.MeshLambertMaterial({color:YEL}));
-  head.position.set(0-hp[0],4.8-hp[1],.25-hp[2]);   /* round head, nudged forward */
+  var hp=LIMBS.head.piv,head=new THREE.Mesh(new THREE.SphereGeometry(1.15,48,32),new THREE.MeshLambertMaterial({color:YEL}));
+  head.position.set(0-hp[0],5.05-hp[1],.25-hp[2]);   /* round head, nudged forward */
   head.userData.limb='head';limbG.head.add(head);charPick.push(head);
 })();
 function applyPose(id){
-  var g=limbG[id],pv=LIMBS[id].piv,P=pose[id];
-  g.position.set(pv[0]+P.o[0],pv[1]+P.o[1],pv[2]+P.o[2]);
+  var g=limbG[id],pv=LIMBS[id].piv,P=pose[id],ps=POSTURE[posture]&&POSTURE[posture][id];
+  g.position.set(pv[0]+P.o[0],pv[1]+P.o[1]+(ps?(ps.oy||0):0),pv[2]+P.o[2]);
   g.quaternion.copy(P.q);
+  if(ps)g.quaternion.premultiply(ps.q);
 }
 function resetLimb(id){pose[id].q.set(0,0,0,1);pose[id].o=[0,0,0];applyPose(id);}
 function resetAllLimbs(){for(var k in LIMBS)if(k!=='torso')resetLimb(k);}
@@ -311,6 +443,21 @@ function highlightLimb(){
     var m=charPick[i];
     m.material.emissive.setHex(poseOn&&m.userData.limb===poseSel?0x16407a:0x000000);
   }
+}
+
+/* postures are static poses (no animation): sitting = legs forward + body lowered, climbing = arms up */
+var posture='stand',climb=null;
+var POSTURE=(function(){
+  var X=new THREE.Vector3(1,0,0);
+  function q(a){return new THREE.Quaternion().setFromAxisAngle(X,a);}
+  return {sit:{legL:{q:q(-Math.PI/2),oy:-.5},legR:{q:q(-Math.PI/2),oy:-.5}},
+          climb:{armL:{q:q(-Math.PI*.85),oy:0},armR:{q:q(-Math.PI*.85),oy:0}}};
+})();
+function setPosture(p){
+  posture=p;
+  for(var k in LIMBS)if(k!=='torso')applyPose(k);
+  var a=$('sitBtn'),b=$('standBtn');
+  if(a){a.classList.toggle('on',p==='sit');b.classList.toggle('on',p==='stand');}
 }
 
 /* ---------- camera ---------- */
@@ -363,18 +510,22 @@ function pickLimb(cx,cy){
 
 /* ---------- HUD: selection box + handles ---------- */
 var AXC=['#d0605a','#5fb06a','#5a86d0'];
-function drawSelection(){
-  var p=selected;if(!p)return;
+function drawBox(p,col,w){
   var g=.03,mn=[p.mn[0]-g,p.mn[1]-g,p.mn[2]-g],mx=[p.mx[0]+g,p.mx[1]+g,p.mx[2]+g],c=[],b;
   for(b=0;b<8;b++)c.push(proj(b&1?mx[0]:mn[0],b&2?mx[1]:mn[1],b&4?mx[2]:mn[2]));
   var E=[[0,1],[2,3],[4,5],[6,7],[0,2],[1,3],[4,6],[5,7],[0,4],[1,5],[2,6],[3,7]];
-  hctx.strokeStyle='#2a8cff';hctx.lineWidth=1.75;hctx.beginPath();
+  hctx.strokeStyle=col;hctx.lineWidth=w;hctx.beginPath();
   for(b=0;b<E.length;b++){
     var A=c[E[b][0]],B=c[E[b][1]];
     if(!A||!B)continue;
     hctx.moveTo(A[0],A[1]);hctx.lineTo(B[0],B[1]);
   }
   hctx.stroke();
+}
+function drawSelection(){
+  var p=selected;if(!p)return;
+  if(p.group)for(var i=0;i<parts.length;i++){var q=parts[i];if(q!==p&&q.group===p.group)drawBox(q,'rgba(42,140,255,.45)',1);}
+  drawBox(p,'#2a8cff',1.75);
 }
 function getHandles(){
   var out=[];
@@ -536,7 +687,8 @@ function update(dt){
   var fwd=(down('KeyW','ArrowUp','KeyU')?1:0)-(down('KeyS','ArrowDown','KeyJ')?1:0);
   var turn=(down('KeyA','ArrowLeft','KeyH')?1:0)-(down('KeyD','ArrowRight','KeyK')?1:0);
   if(running){
-    if(poseOn){physics(dt,0);}
+    if(climb){updateClimb(dt);}
+    else if(poseOn||posture==='sit'){physics(dt,0);}
     else{
       facing+=turn*TURN*dt;          /* turning never swings the camera */
       physics(dt,fwd);
@@ -567,15 +719,27 @@ function insertPart(){
 function deleteSelected(){
   if(running)return;
   if(!selected){say('Select a part first, then click Trash.');return;}
-  if(!selected.fixed){removePart(selected);sfxDelete();say('Part deleted.');}
+  if(!selected.fixed){
+    if(selected.group){var gid=selected.group;for(var di=parts.length-1;di>=0;di--)if(parts[di].group===gid)removePart(parts[di]);}
+    else removePart(selected);
+    sfxDelete();say('Part deleted.');
+  }
   selected=null;drag=null;
 }
 function duplicateSelected(){
   if(running)return;
   if(!selected){say('Select a part first, then click Duplicate.');return;}
-  var o=selected;
-  selected=addPart(o.x+o.sx,o.y,o.z,o.sx,o.sy,o.sz,o.col,false);   /* copy goes right next to the original */
-  say('Part duplicated.');
+  var o=selected,src=[],i,q;
+  if(o.group){for(i=0;i<parts.length;i++)if(parts[i].group===o.group)src.push(parts[i]);}else src.push(o);
+  var mn=1e9,mx=-1e9;
+  for(i=0;i<src.length;i++){mn=Math.min(mn,src[i].mn[0]);mx=Math.max(mx,src[i].mx[0]);}
+  var shift=Math.max(1,Math.round(mx-mn)),ng=o.group?groupSeq++:0,sel=null;   /* copy goes right next to the original */
+  for(i=0;i<src.length;i++){
+    q=src[i];
+    var c=addPart(q.x+shift,q.y,q.z,q.sx,q.sy,q.sz,q.col,false,{role:q.role,group:ng});
+    if(q===o)sel=c;
+  }
+  selected=sel;say('Part duplicated.');
 }
 function setLimb(id){
   poseSel=id;
@@ -610,6 +774,9 @@ function setRun(v){
   $('menuL').classList.toggle('running',v);
   $('poseBtn').classList.toggle('off',!v);
   charRoot.visible=v;
+  climb=null;setPosture('stand');
+  resetStats();hudStats.classList.toggle('show',v);
+  var rb=['sitBtn','standBtn','ladderBtn'];for(var ri=0;ri<rb.length;ri++)$(rb[ri]).classList.toggle('off',!v);
   if(v){
     saved={yaw:yaw,pitch:pitch,camDist:camDistT};
     selected=null;drag=null;hoverKey=-1;
@@ -687,6 +854,10 @@ canvas.addEventListener('mousedown',function(e){
       drag={kind:'build',key:h.key,a:h.a,s:h.s,vx:(h.st[0]-h.sf[0])/L,vy:(h.st[1]-h.sf[1])/L,mx:mx,my:my,
             st:{x:s.x,y:s.y,z:s.z,sx:s.sx,sy:s.sy,sz:s.sz},
             lastVal:(tool==='move'?[s.x,s.y,s.z][h.a]:[s.sx,s.sy,s.sz][h.a])};
+      var memb=[],mi0;
+      if(tool==='move'&&s.group){for(mi0=0;mi0<parts.length;mi0++)if(parts[mi0].group===s.group)memb.push(parts[mi0]);}else memb.push(s);
+      drag.mem=[];drag.minBottom=1e9;
+      for(mi0=0;mi0<memb.length;mi0++){var mq=memb[mi0];drag.mem.push({p:mq,x:mq.x,y:mq.y,z:mq.z});drag.minBottom=Math.min(drag.minBottom,mq.y-mq.sy/2);}
     }
   }
 });
@@ -723,15 +894,16 @@ win.addEventListener('mousemove',function(e){
     var S=drag.st,a=drag.a,sg=drag.s,CN=['x','y','z'],SN=['sx','sy','sz'];
     s.x=S.x;s.y=S.y;s.z=S.z;s.sx=S.sx;s.sy=S.sy;s.sz=S.sz;
     if(tool==='move'){
-      s[CN[a]]=S[CN[a]]+sg*n;
-      if(a===1&&s.y-s.sy/2<0)s.y=s.sy/2;
+      var dl=sg*n;
+      if(a===1)dl=Math.max(dl,-drag.minBottom);
+      for(var mi=0;mi<drag.mem.length;mi++){var M=drag.mem[mi],q2=M.p;q2.x=M.x;q2.y=M.y;q2.z=M.z;q2[CN[a]]=M[CN[a]]+dl;refresh(q2);}
     }else{
       var ns=clamp(S[SN[a]]+n,1,256);
       if(a===1&&sg<0)ns=Math.min(ns,S.sy+(S.y-S.sy/2));
       s[SN[a]]=ns;
       s[CN[a]]=S[CN[a]]+sg*(ns-S[SN[a]])/2;
     }
-    refresh(s);
+    if(tool!=='move')refresh(s);
     var curV=(tool==='move')?s[CN[a]]:s[SN[a]],stp=Math.round(Math.abs(curV-drag.lastVal));
     if(stp>0){
       drag.lastVal=curV;
@@ -766,18 +938,12 @@ win.addEventListener('mouseup',function(e){
     }
   }
 });
-/* old-Roblox style zoom: fixed steps per wheel notch, eased quickly; the snap only fires now and then */
+/* ---------- zoom: old-Roblox style steps (wheel + magnifier buttons); the snap only fires now and then ---------- */
 var ZOOM_STEP=1.22,ZOOM_NOTCH=60,SNAP_COOLDOWN=320;
-canvas.addEventListener('wheel',function(e){
-  var d=e.deltaY*(e.deltaMode===1?33:1);
-  if((zoomAcc>0)!==(d>0))zoomAcc=0;
-  zoomAcc+=d;
-  var old=camDistT,dir=0,steps=0;
-  while(Math.abs(zoomAcc)>=ZOOM_NOTCH&&steps<3){
-    dir=zoomAcc<0?-1:1;zoomAcc-=dir*ZOOM_NOTCH;steps++;
-    camDistT=clamp(camDistT*(dir<0?1/ZOOM_STEP:ZOOM_STEP),4,140);
-  }
-  if(dir!==0&&Math.abs(camDistT-old)>1e-6){
+function zoomStep(dir){
+  var old=camDistT;
+  camDistT=clamp(camDistT*(dir<0?1/ZOOM_STEP:ZOOM_STEP),4,140);
+  if(Math.abs(camDistT-old)>1e-6){
     var now=performance.now();
     if(now-lastSnapFx>SNAP_COOLDOWN){
       lastSnapFx=now;
@@ -785,8 +951,273 @@ canvas.addEventListener('wheel',function(e){
       sfxSnap();
     }
   }
+}
+canvas.addEventListener('wheel',function(e){
+  var d=e.deltaY*(e.deltaMode===1?33:1),steps=0;
+  if((zoomAcc>0)!==(d>0))zoomAcc=0;
+  zoomAcc+=d;
+  while(Math.abs(zoomAcc)>=ZOOM_NOTCH&&steps<3){
+    var dir=zoomAcc<0?-1:1;zoomAcc-=dir*ZOOM_NOTCH;steps++;
+    zoomStep(dir);
+  }
   e.preventDefault();
 },{passive:false});
+
+/* ---------- maps and models (.json) ---------- */
+var LADDER={"format":"dynablocks-model","version":1,"name":"Ladder","parts":[{"x":-1.25,"y":6,"z":0,"sx":0.5,"sy":12,"sz":0.5,"color":"#da8541","role":"ladder"},{"x":1.25,"y":6,"z":0,"sx":0.5,"sy":12,"sz":0.5,"color":"#da8541","role":"ladder"},{"x":0,"y":1,"z":0,"sx":2,"sy":0.4,"sz":0.5,"color":"#c26a2c","role":"ladder"},{"x":0,"y":2,"z":0,"sx":2,"sy":0.4,"sz":0.5,"color":"#c26a2c","role":"ladder"},{"x":0,"y":3,"z":0,"sx":2,"sy":0.4,"sz":0.5,"color":"#c26a2c","role":"ladder"},{"x":0,"y":4,"z":0,"sx":2,"sy":0.4,"sz":0.5,"color":"#c26a2c","role":"ladder"},{"x":0,"y":5,"z":0,"sx":2,"sy":0.4,"sz":0.5,"color":"#c26a2c","role":"ladder"},{"x":0,"y":6,"z":0,"sx":2,"sy":0.4,"sz":0.5,"color":"#c26a2c","role":"ladder"},{"x":0,"y":7,"z":0,"sx":2,"sy":0.4,"sz":0.5,"color":"#c26a2c","role":"ladder"},{"x":0,"y":8,"z":0,"sx":2,"sy":0.4,"sz":0.5,"color":"#c26a2c","role":"ladder"},{"x":0,"y":9,"z":0,"sx":2,"sy":0.4,"sz":0.5,"color":"#c26a2c","role":"ladder"},{"x":0,"y":10,"z":0,"sx":2,"sy":0.4,"sz":0.5,"color":"#c26a2c","role":"ladder"},{"x":0,"y":11,"z":0,"sx":2,"sy":0.4,"sz":0.5,"color":"#c26a2c","role":"ladder"},{"x":0,"y":11.5,"z":-2.25,"sx":4,"sy":1,"sz":4,"color":"#a3a2a5","role":"platform"}]};
+function colorHex(n){return '#'+('000000'+(n&0xffffff).toString(16)).slice(-6);}
+function parseColor(c){
+  if(typeof c==='number')return c&0xffffff;
+  if(typeof c==='string'){var m=/^#?([0-9a-f]{6})$/i.exec(c.trim());if(m)return parseInt(m[1],16);}
+  return 0xa3a2a5;
+}
+function validParts(arr){
+  var out=[],keys=['x','y','z','sx','sy','sz'];
+  if(!Array.isArray(arr))return out;
+  for(var i=0;i<arr.length&&out.length<5000;i++){
+    var q=arr[i],ok=true,k;
+    if(!q||typeof q!=='object')continue;
+    for(k=0;k<6;k++)if(typeof q[keys[k]]!=='number'||!isFinite(q[keys[k]]))ok=false;
+    if(!ok||q.sx<=0||q.sy<=0||q.sz<=0)continue;
+    out.push(q);
+  }
+  return out;
+}
+function clearParts(keepFixed){
+  for(var i=parts.length-1;i>=0;i--){if(keepFixed&&parts[i].fixed)continue;removePart(parts[i]);}
+  selected=null;drag=null;
+}
+function addBaseplate(){return addPart(0,-.5,0,128,1,128,0x4b974b,true);}
+function newBaseplate(){
+  var others=0;for(var i=0;i<parts.length;i++)if(!parts[i].fixed)others++;
+  if(others&&!win.confirm('Start a new map? Everything you built will be removed.'))return;
+  clearParts(false);addBaseplate();focus=[0,1,0];say('New baseplate created.');
+}
+function partToJson(p){
+  var o={x:p.x,y:p.y,z:p.z,sx:p.sx,sy:p.sy,sz:p.sz,color:colorHex(p.col)};
+  if(p.role)o.role=p.role;if(p.group)o.group=p.group;if(p.fixed)o.baseplate=true;
+  return o;
+}
+var includeBase=true;
+function saveMap(){
+  var arr=[],i;
+  for(i=0;i<parts.length;i++){if(parts[i].fixed&&!includeBase)continue;arr.push(partToJson(parts[i]));}
+  var data={format:'dynablocks-map',version:1,name:'Map',parts:arr};
+  var blob=new Blob([JSON.stringify(data,null,1)],{type:'application/json'});
+  var a=doc.createElement('a');a.href=URL.createObjectURL(blob);a.download='map.json';
+  doc.body.appendChild(a);a.click();
+  setTimeout(function(){URL.revokeObjectURL(a.href);doc.body.removeChild(a);},500);
+  say('Saved map.json ('+arr.length+' parts, '+(includeBase?'with':'without')+' baseplate).');
+}
+function loadMapData(data){
+  var list=validParts(data&&data.parts),i,hasBase=false;
+  if(!list.length){say('That map has no valid parts.');return;}
+  for(i=0;i<list.length;i++)if(list[i].baseplate)hasBase=true;
+  clearParts(!hasBase);                       /* a map without a baseplate keeps yours */
+  var gmap={};
+  for(i=0;i<list.length;i++){
+    var q=list[i],g=0;
+    if(q.group){if(!gmap[q.group])gmap[q.group]=groupSeq++;g=gmap[q.group];}
+    addPart(q.x,q.y,q.z,q.sx,q.sy,q.sz,parseColor(q.color),!!q.baseplate,{role:q.role,group:g});
+  }
+  say('Loaded '+list.length+' parts'+(hasBase?'.':' (kept your current baseplate).'));
+}
+function insertModel(data){
+  if(running){say('Stop the game first (press Stop).');return;}
+  var list=validParts(data&&data.parts),i;
+  if(!list.length){say('That model has no valid parts.');return;}
+  var mnx=1e9,mxx=-1e9,mnz=1e9,mxz=-1e9,mny=1e9;
+  for(i=0;i<list.length;i++){var q=list[i];
+    mnx=Math.min(mnx,q.x-q.sx/2);mxx=Math.max(mxx,q.x+q.sx/2);
+    mnz=Math.min(mnz,q.z-q.sz/2);mxz=Math.max(mxz,q.z+q.sz/2);mny=Math.min(mny,q.y-q.sy/2);}
+  var h=pickPart(VW/2,VH/2),bx,bz,by;
+  if(h){bx=h.point.x;bz=h.point.z;by=h.part.mx[1];}else{bx=focus[0];bz=focus[2];by=0;}
+  var dx=Math.round(bx-(mnx+mxx)/2),dz=Math.round(bz-(mnz+mxz)/2),dy=by-mny;
+  var g0=groupSeq++,gmap={},first=null;
+  for(i=0;i<list.length;i++){
+    var p=list[i],g=g0;
+    if(p.group){if(!gmap[p.group])gmap[p.group]=groupSeq++;g=gmap[p.group];}
+    var np=addPart(p.x+dx,p.y+dy,p.z+dz,p.sx,p.sy,p.sz,parseColor(p.color),false,{role:p.role,group:g});
+    if(!first)first=np;
+  }
+  selected=first;say('Inserted '+(data.name||'model')+'.');
+}
+
+/* ---------- Toolbox ---------- */
+var tbModels=[{name:'Ladder',data:LADDER}],tbAsked=false;
+function renderToolbox(){
+  var box=$('tbList');box.innerHTML='';
+  tbModels.forEach(function(m){
+    var b=doc.createElement('button');b.type='button';b.className='btn';b.textContent=m.name;b.title='Insert '+m.name;
+    b.addEventListener('click',function(){useModel(m);b.blur();});
+    box.appendChild(b);
+  });
+}
+function useModel(m){
+  if(running){say('Stop the game first (press Stop).');return;}
+  if(m.data){insertModel(m.data);return;}
+  fetch(m.url).then(function(r){if(!r.ok)throw 0;return r.json();}).then(insertModel).catch(function(){say('Could not read '+m.url);});
+}
+function addModelEntry(name,extra){
+  for(var i=0;i<tbModels.length;i++)if(tbModels[i].name.toLowerCase()===name.toLowerCase())return;
+  extra.name=name;tbModels.push(extra);
+}
+function discoverModels(){
+  var note=$('tbNote');
+  function done(entries){
+    entries.forEach(function(e){
+      if(/^models\.json$/i.test(e.file))return;
+      addModelEntry(e.name||e.file.replace(/\.json$/i,''),{url:'Assets/Models/'+encodeURI(e.file)});
+    });
+    renderToolbox();
+  }
+  function fail(){note.textContent="Can't read Assets/Models when the page is opened straight from disk. Serve this folder (see Help) or use the button below.";}
+  try{
+    fetch('Assets/Models/models.json').then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(arr){
+      done(arr.map(function(x){return typeof x==='string'?{file:x}:{file:x.file,name:x.name};}));
+    }).catch(function(){
+      fetch('Assets/Models/').then(function(r){if(!r.ok)throw 0;return r.text();}).then(function(t){
+        var re=/href="([^"?#]+\.json)"/gi,m,out=[];
+        while((m=re.exec(t)))out.push({file:decodeURIComponent(m[1].split('/').pop())});
+        done(out);
+      }).catch(fail);
+    });
+  }catch(e){fail();}
+}
+function toggleToolbox(){
+  var el=$('toolbox'),open=!el.classList.contains('show');
+  el.classList.toggle('show',open);
+  if(open&&!tbAsked){tbAsked=true;discoverModels();}
+}
+renderToolbox();
+$('tbClose').addEventListener('click',function(){$('toolbox').classList.remove('show');});
+$('tbLoad').addEventListener('click',function(){$('modelIn').click();});
+$('modelIn').addEventListener('change',function(){
+  var inp=this,files=inp.files?Array.prototype.slice.call(inp.files):[];
+  files.forEach(function(f){
+    var rd=new FileReader();
+    rd.onload=function(){
+      try{var d=JSON.parse(rd.result);if(!validParts(d&&d.parts).length)throw 0;
+          addModelEntry((d&&d.name)||f.name.replace(/\.json$/i,''),{data:d});renderToolbox();say('Added '+f.name+' to the Toolbox.');}
+      catch(err){say(f.name+' is not a valid model .json.');}
+    };
+    rd.readAsText(f);
+  });
+  inp.value='';
+});
+
+/* ---------- top menu bar ---------- */
+var fileMenu=$('fileMenu');
+function closeMenus(){fileMenu.classList.remove('show');}
+$('mFile').addEventListener('click',function(e){
+  var r=this.getBoundingClientRect();fileMenu.style.left=r.left+'px';fileMenu.style.top=r.bottom+'px';
+  fileMenu.classList.toggle('show');e.stopPropagation();
+});
+$('mInsert').addEventListener('click',function(e){closeMenus();toggleToolbox();e.stopPropagation();});
+['mEdit','mView','mFormat'].forEach(function(id){
+  $(id).addEventListener('click',function(e){closeMenus();say('"'+this.textContent+'" is not available yet.');e.stopPropagation();});
+});
+doc.addEventListener('mousedown',function(e){if(!fileMenu.contains(e.target)&&e.target!==$('mFile'))closeMenus();});
+win.addEventListener('keydown',function(e){if(e.code==='Escape'){closeMenus();$('helpWin').classList.remove('show');}});
+fileMenu.addEventListener('click',function(e){
+  var b=e.target;while(b&&b!==fileMenu&&!(b.getAttribute&&b.getAttribute('data-act')))b=b.parentNode;
+  if(!b||b===fileMenu)return;
+  var act=b.getAttribute('data-act');
+  if(act==='incbase'){includeBase=!includeBase;b.textContent=(includeBase?'[x] ':'[ ] ')+'Include baseplate when saving';return;}
+  closeMenus();
+  if(running){say('Stop the game first (press Stop).');return;}
+  if(act==='new')newBaseplate();
+  else if(act==='save')saveMap();
+  else if(act==='load')$('fileIn').click();
+});
+$('fileIn').addEventListener('change',function(){
+  var inp=this,f=inp.files&&inp.files[0];if(!f)return;
+  var rd=new FileReader();
+  rd.onload=function(){try{loadMapData(JSON.parse(rd.result));}catch(err){say('That file is not a valid map .json.');}};
+  rd.readAsText(f);inp.value='';
+});
+
+/* ---------- help window ---------- */
+wire('helpBtn',function(){$('helpWin').classList.toggle('show');});
+$('helpClose').addEventListener('click',function(){$('helpWin').classList.remove('show');});
+
+/* ---------- right panel: reset, zoom, sit / stand / ladder ---------- */
+function resetGame(){
+  if(!running){say('Press Go first, then you can reset the game.');return;}
+  climb=null;resetAllLimbs();setPosture('stand');spawn();resetStats();say('Game reset.');
+}
+wire('resetBtn',resetGame);
+wire('zoomInBtn',function(){zoomStep(-1);});
+wire('zoomOutBtn',function(){zoomStep(1);});
+wire('sitBtn',function(){if(running&&!climb){setPosture('sit');say('Sitting. Press the standing figure to get up.');}});
+wire('standBtn',function(){if(running&&!climb){setPosture('stand');say('Standing.');}});
+wire('ladderBtn',function(){startClimb();});
+wire('commentBtn',function(){say('Comments are not available yet.');});
+wire('bugBtn',function(){say('Bug reports are not available yet.');});
+
+/* ---------- Timer + Score (shown while running) ---------- */
+var TIMER_START=60,timerT=TIMER_START,lastTT='',score=0,timerEl=$('timerTxt'),scoreEl=$('scoreTxt'),hudStats=$('hudStats');
+function setScore(n){score=n;scoreEl.textContent='Score: '+score;}
+function resetStats(){timerT=TIMER_START;lastTT='';timerEl.textContent='Timer: '+TIMER_START.toFixed(1);setScore(0);}
+function tickTimer(dt){
+  if(!running)return;
+  timerT=Math.max(0,timerT-dt);
+  var t=timerT.toFixed(1);
+  if(t!==lastTT){lastTT=t;timerEl.textContent='Timer: '+t;}
+}
+win.DynaBlocks={setScore:setScore,addScore:function(n){setScore(score+n);},getScore:function(){return score;}};   /* for future models */
+resetStats();
+
+/* ---------- ladder: find the nearest one, "climb" it, end on its platform ---------- */
+var LADDER_RANGE=30;
+function findLadder(){
+  var groups={},i,a,p,key,g,best=null,bd=LADDER_RANGE;
+  for(i=0;i<parts.length;i++){
+    p=parts[i];if(p.role!=='ladder')continue;
+    key=p.group?('g'+p.group):('p'+i);
+    g=groups[key]||(groups[key]={mn:[1e9,1e9,1e9],mx:[-1e9,-1e9,-1e9],group:p.group});
+    for(a=0;a<3;a++){g.mn[a]=Math.min(g.mn[a],p.mn[a]);g.mx[a]=Math.max(g.mx[a],p.mx[a]);}
+  }
+  for(key in groups){
+    g=groups[key];
+    var d=hyp(Math.max(g.mn[0]-pos.x,0,pos.x-g.mx[0]),Math.max(g.mn[2]-pos.z,0,pos.z-g.mx[2]));
+    if(d<bd){bd=d;best=g;}
+  }
+  if(!best)return null;
+  var plat=null;
+  if(best.group)for(i=0;i<parts.length;i++)if(parts[i].group===best.group&&parts[i].role==='platform'){plat=parts[i];break;}
+  return {box:best,plat:plat};
+}
+function startClimb(){
+  if(!running||climb)return;
+  var f=findLadder();
+  if(!f){say('No ladder nearby.');return;}
+  var g=f.box,cx=(g.mn[0]+g.mx[0])/2,cz=(g.mn[2]+g.mx[2])/2,hw=(g.mx[0]-g.mn[0])/2,hd=(g.mx[2]-g.mn[2])/2,dx=pos.x-cx,dz=pos.z-cz,ax,az;
+  /* approach along the ladder's thin side, from the side opposite the platform, so the platform is ahead at the top */
+  var vx=f.plat?f.plat.x-cx:0,vz=f.plat?f.plat.z-cz:0,sd;
+  if(hd<=hw){sd=(f.plat&&Math.abs(vz)>=Math.abs(vx))?(vz>0?-1:1):(dz>=0?1:-1);ax=cx;az=cz+sd*(hd+.9);}
+  else{sd=(f.plat&&Math.abs(vx)>=Math.abs(vz))?(vx>0?-1:1):(dx>=0?1:-1);ax=cx+sd*(hw+.9);az=cz;}
+  var ty=f.plat?f.plat.mx[1]:g.mx[1],tx=f.plat?f.plat.x:ax,tz=f.plat?f.plat.z:az;
+  facing=Math.atan2(cx-ax,cz-az);
+  setPosture('climb');
+  climb={stage:0,t:0,dur:.3,x0:pos.x,y0:pos.y,z0:pos.z,ax:ax,ay:g.mn[1],az:az,tx:tx,ty:ty,tz:tz};
+  say('Climbing...');
+}
+function smooth(t){return t*t*(3-2*t);}
+function updateClimb(dt){
+  var c=climb,k,e;
+  c.t+=dt;vy=0;grounded=true;
+  k=clamp(c.t/c.dur,0,1);
+  if(c.stage===0){e=smooth(k);pos.x=c.x0+(c.ax-c.x0)*e;pos.z=c.z0+(c.az-c.z0)*e;pos.y=c.y0+(c.ay-c.y0)*e;}
+  else if(c.stage===1){pos.x=c.ax;pos.z=c.az;pos.y=c.ay+(c.ty-c.ay)*k;}
+  else{e=smooth(k);pos.x=c.ax+(c.tx-c.ax)*e;pos.z=c.az+(c.tz-c.az)*e;pos.y=c.ty;}
+  if(k>=1){
+    c.stage++;c.t=0;
+    if(c.stage===1)c.dur=Math.max(.5,(c.ty-c.ay)/9);
+    else if(c.stage===2)c.dur=.4;
+    else{pos.x=c.tx;pos.z=c.tz;pos.y=c.ty;climb=null;setPosture('stand');say('Reached the platform.');}
+  }
+}
 
 /* ---------- main loop ---------- */
 win.addEventListener('resize',resize);
@@ -798,12 +1229,13 @@ function frame(){
   last=t;if(dt<=0)dt=.001;
   try{
     update(dt);
+    tickTimer(dt);
     camDist+=(camDistT-camDist)*(1-Math.exp(-dt*20));
     if(Math.abs(camDistT-camDist)<.001)camDist=camDistT;
     fovK*=Math.exp(-dt*12);if(Math.abs(fovK)<.01)fovK=0;
     var fv=70+fovK;
     if(Math.abs(camera.fov-fv)>.001){camera.fov=fv;camera.updateProjectionMatrix();}
-    charRoot.position.set(pos.x,pos.y,pos.z);
+    charRoot.position.set(pos.x,pos.y+(posture==='sit'?-1:0),pos.z);
     charRoot.rotation.y=facing;
     updateCamera();
     updateSky();
