@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Parrot Cay - Dynablocks-like (three.js v5)</title>
+<title>Parrot Cay - Dynablocks-like (three.js v6)</title>
 <style>
 *{box-sizing:border-box}
 html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#7fb4e6;font-family:Tahoma,Verdana,Arial,sans-serif;-webkit-user-select:none;user-select:none}
@@ -131,6 +131,34 @@ html.mc,html.mc *{cursor:none !important}
 #hudStats{position:fixed;right:212px;top:38px;z-index:4;text-align:right;pointer-events:none;display:none;font:bold 30px/34px 'Arial Narrow','Segoe UI',Arial,sans-serif;letter-spacing:.5px;color:#8fd020;
   text-shadow:-2px -2px 0 #1d3a05,2px -2px 0 #1d3a05,-2px 2px 0 #1d3a05,2px 2px 0 #1d3a05,0 3px 0 #1d3a05,0 -2px 0 #1d3a05}
 #hudStats.show{display:block}
+
+/* ---- v6: right menu laid out like UI2.png. Your icons are tight crops, so each button is the visible element's
+        size and the square image is drawn centred on it (the transparent part may overflow, but never takes clicks) ---- */
+#menuR{display:block;padding:0;border:11px solid #c3d0e8;box-shadow:inset 0 0 0 1px #56657a;width:184px;height:484px;max-height:calc(100% - 52px)}
+#menuR .rimg{position:absolute;transform:translate(-50%,-50%)}
+#menuR .rimg .ri{left:50%;top:50%;transform:translate(-50%,-50%)}
+#menuR .pbtn .ri,#menuR .pbtn .fb{top:50%;bottom:auto;transform:translate(-50%,-50%)}
+#menuR #logo{left:82px;top:18px;width:148px;height:26px;pointer-events:none}
+#menuR #logo .ri{width:152px;height:152px}
+#menuR #helpBtn{left:81px;top:78px;width:74px;height:74px}
+#menuR #helpBtn .ri{width:88px;height:88px}
+#menuR #resetBtn{left:83px;top:144px;width:141px;height:34px}
+#menuR #resetBtn .ri{width:152px;height:152px}
+#menuR .zbtn{width:46px;height:46px}
+#menuR .zbtn .ri{width:50px;height:50px}
+#menuR #zoomInBtn{left:34px;top:199px}
+#menuR #zoomOutBtn{left:126px;top:199px}
+#menuR #sitBtn{left:24px;top:313px;width:39px;height:42px}
+#menuR #sitBtn .ri{width:46px;height:46px}
+#menuR #standBtn{left:84px;top:305px;width:36px;height:66px}
+#menuR #standBtn .ri{width:69px;height:69px}
+#menuR #ladderBtn{left:143px;top:286px;width:31px;height:107px}
+#menuR #ladderBtn .ri{width:115px;height:115px}
+#menuR .cbox{position:absolute;left:11px;top:392px;width:144px;height:60px;margin:0;padding:3px 4px}
+#menuR .cbox button{font-size:15px;padding:4px 6px}
+/* select.png already has its own blue ring, so no extra outline on it (the text fallback still shows which tool is active) */
+#toolSelect.active{box-shadow:none}
+#toolSelect.noimg.active{box-shadow:0 0 0 3px #19e6ee}
 </style>
 </head>
 <body>
@@ -182,22 +210,18 @@ html.mc,html.mc *{cursor:none !important}
   <div id="logo" class="rimg"><img class="ri" src="Assets/Icons/dynablocks.png" alt="" draggable="false" onload="this.parentNode.classList.add('hasimg')" onerror="this.remove()"><span class="fb"><span style="color:#e8266a">D</span><span style="color:#5a9a0a">y</span><span style="color:#2b3fd0">n</span><span style="color:#f08a30">a</span><span style="color:#b5c21a">B</span><span style="color:#a23fa8">l</span><span style="color:#8fd3e3">o</span><span style="color:#e8a020">c</span><span style="color:#c03f78">k</span><span style="color:#4c9a2a">s</span></span></div>
   <button class="rimg" id="helpBtn" type="button" title="Help"><img class="ri" src="Assets/Icons/help.png" alt="" draggable="false" onload="this.parentNode.classList.add('hasimg')" onerror="this.remove()"><span class="fb qbtn">?</span></button>
   <button class="rimg" id="resetBtn" type="button" title="Reset game"><img class="ri" src="Assets/Icons/reset.png" alt="" draggable="false" onload="this.parentNode.classList.add('hasimg')" onerror="this.remove()"><span class="fb rbtn">RESET GAME</span></button>
-  <div class="zrow">
-    <button class="rimg zbtn" id="zoomInBtn" type="button" title="Zoom in"><img class="ri" src="Assets/Icons/plus.png" alt="" draggable="false" onload="this.parentNode.classList.add('hasimg')" onerror="this.remove()"><span class="fb"><svg viewBox="0 0 44 44" width="44" height="44" shape-rendering="crispEdges"><line x1="28" y1="28" x2="41" y2="41" stroke="#000" stroke-width="9"/><line x1="28" y1="28" x2="41" y2="41" stroke="#2b4fe0" stroke-width="5.5"/><line x1="29" y1="29" x2="40" y2="40" stroke="#9fb4ff" stroke-width="1.5" stroke-dasharray="2 3"/><circle cx="18" cy="18" r="14" fill="#eef1f7" stroke="#000" stroke-width="3"/><rect x="10" y="16" width="16" height="4" fill="#8b0000"/><rect x="16" y="10" width="4" height="16" fill="#8b0000"/></svg></span></button>
-    <button class="rimg zbtn" id="zoomOutBtn" type="button" title="Zoom out"><img class="ri" src="Assets/Icons/minus.png" alt="" draggable="false" onload="this.parentNode.classList.add('hasimg')" onerror="this.remove()"><span class="fb"><svg viewBox="0 0 44 44" width="44" height="44" shape-rendering="crispEdges"><line x1="28" y1="28" x2="41" y2="41" stroke="#000" stroke-width="9"/><line x1="28" y1="28" x2="41" y2="41" stroke="#2b4fe0" stroke-width="5.5"/><line x1="29" y1="29" x2="40" y2="40" stroke="#9fb4ff" stroke-width="1.5" stroke-dasharray="2 3"/><circle cx="18" cy="18" r="14" fill="#eef1f7" stroke="#000" stroke-width="3"/><rect x="10" y="16" width="16" height="4" fill="#8b0000"/></svg></span></button>
-  </div>
-  <div class="prow">
-    <button class="rimg pbtn off" id="sitBtn" type="button" title="Sit"><img class="ri" src="Assets/Icons/sit.png" alt="" draggable="false" onload="this.parentNode.classList.add('hasimg')" onerror="this.remove()"><span class="fb"><svg viewBox="0 0 44 44" height="40" shape-rendering="crispEdges"><circle cx="13" cy="9" r="5" fill="#ffee00" stroke="#000" stroke-width="1.5"/><rect x="5" y="15" width="14" height="22" fill="#bdbdbd" stroke="#000" stroke-width="2"/><rect x="9" y="19" width="5" height="14" fill="#9d9d9d" stroke="#555" stroke-width="1.5"/><rect x="22" y="32" width="19" height="5" fill="#bdbdbd" stroke="#000" stroke-width="2"/></svg></span></button>
-    <button class="rimg pbtn off" id="standBtn" type="button" title="Stand up"><img class="ri" src="Assets/Icons/stand.png" alt="" draggable="false" onload="this.parentNode.classList.add('hasimg')" onerror="this.remove()"><span class="fb"><svg viewBox="0 0 52 58" height="58" shape-rendering="crispEdges"><circle cx="26" cy="8" r="6" fill="#ffee00" stroke="#000" stroke-width="1.5"/><rect x="14" y="16" width="24" height="22" fill="#bdbdbd" stroke="#000" stroke-width="2"/><rect x="8" y="17" width="6" height="16" fill="#bdbdbd" stroke="#000" stroke-width="2"/><rect x="38" y="17" width="6" height="16" fill="#bdbdbd" stroke="#000" stroke-width="2"/><rect x="17" y="38" width="7" height="14" fill="#bdbdbd" stroke="#000" stroke-width="2"/><rect x="28" y="38" width="7" height="14" fill="#bdbdbd" stroke="#000" stroke-width="2"/><rect x="6" y="54" width="40" height="3" fill="#0a7a0a"/></svg></span></button>
-    <button class="rimg pbtn off" id="ladderBtn" type="button" title="Climb the nearest ladder"><img class="ri" src="Assets/Icons/climb.png" alt="" draggable="false" onload="this.parentNode.classList.add('hasimg')" onerror="this.remove()"><span class="fb"><svg viewBox="0 0 40 74" height="100" shape-rendering="crispEdges"><g fill="#ff8a40"><rect x="5" y="0" width="3" height="74"/><rect x="32" y="0" width="3" height="74"/><rect x="5" y="3" width="30" height="3"/><rect x="5" y="12" width="30" height="3"/><rect x="5" y="60" width="30" height="3"/><rect x="5" y="69" width="30" height="3"/></g><circle cx="21" cy="21" r="5" fill="#ffee00" stroke="#000" stroke-width="1.5"/><rect x="11" y="27" width="20" height="17" fill="#bdbdbd" stroke="#000" stroke-width="2"/><rect x="7" y="17" width="5" height="16" fill="#bdbdbd" stroke="#000" stroke-width="2"/><rect x="13" y="44" width="6" height="14" fill="#bdbdbd" stroke="#000" stroke-width="2"/><rect x="22" y="44" width="6" height="14" fill="#bdbdbd" stroke="#000" stroke-width="2"/></svg></span></button>
-  </div>
+  <button class="rimg zbtn" id="zoomInBtn" type="button" title="Zoom in"><img class="ri" src="Assets/Icons/plus.png" alt="" draggable="false" onload="this.parentNode.classList.add('hasimg')" onerror="this.remove()"><span class="fb"><svg viewBox="0 0 44 44" width="44" height="44" shape-rendering="crispEdges"><line x1="28" y1="28" x2="41" y2="41" stroke="#000" stroke-width="9"/><line x1="28" y1="28" x2="41" y2="41" stroke="#2b4fe0" stroke-width="5.5"/><line x1="29" y1="29" x2="40" y2="40" stroke="#9fb4ff" stroke-width="1.5" stroke-dasharray="2 3"/><circle cx="18" cy="18" r="14" fill="#eef1f7" stroke="#000" stroke-width="3"/><rect x="10" y="16" width="16" height="4" fill="#8b0000"/><rect x="16" y="10" width="4" height="16" fill="#8b0000"/></svg></span></button>
+  <button class="rimg zbtn" id="zoomOutBtn" type="button" title="Zoom out"><img class="ri" src="Assets/Icons/minus.png" alt="" draggable="false" onload="this.parentNode.classList.add('hasimg')" onerror="this.remove()"><span class="fb"><svg viewBox="0 0 44 44" width="44" height="44" shape-rendering="crispEdges"><line x1="28" y1="28" x2="41" y2="41" stroke="#000" stroke-width="9"/><line x1="28" y1="28" x2="41" y2="41" stroke="#2b4fe0" stroke-width="5.5"/><line x1="29" y1="29" x2="40" y2="40" stroke="#9fb4ff" stroke-width="1.5" stroke-dasharray="2 3"/><circle cx="18" cy="18" r="14" fill="#eef1f7" stroke="#000" stroke-width="3"/><rect x="10" y="16" width="16" height="4" fill="#8b0000"/></svg></span></button>
+  <button class="rimg pbtn off" id="sitBtn" type="button" title="Sit"><img class="ri" src="Assets/Icons/sit.png" alt="" draggable="false" onload="this.parentNode.classList.add('hasimg')" onerror="this.remove()"><span class="fb"><svg viewBox="0 0 44 44" height="40" shape-rendering="crispEdges"><circle cx="13" cy="9" r="5" fill="#ffee00" stroke="#000" stroke-width="1.5"/><rect x="5" y="15" width="14" height="22" fill="#bdbdbd" stroke="#000" stroke-width="2"/><rect x="9" y="19" width="5" height="14" fill="#9d9d9d" stroke="#555" stroke-width="1.5"/><rect x="22" y="32" width="19" height="5" fill="#bdbdbd" stroke="#000" stroke-width="2"/></svg></span></button>
+  <button class="rimg pbtn off" id="standBtn" type="button" title="Stand up"><img class="ri" src="Assets/Icons/stand.png" alt="" draggable="false" onload="this.parentNode.classList.add('hasimg')" onerror="this.remove()"><span class="fb"><svg viewBox="0 0 52 58" height="58" shape-rendering="crispEdges"><circle cx="26" cy="8" r="6" fill="#ffee00" stroke="#000" stroke-width="1.5"/><rect x="14" y="16" width="24" height="22" fill="#bdbdbd" stroke="#000" stroke-width="2"/><rect x="8" y="17" width="6" height="16" fill="#bdbdbd" stroke="#000" stroke-width="2"/><rect x="38" y="17" width="6" height="16" fill="#bdbdbd" stroke="#000" stroke-width="2"/><rect x="17" y="38" width="7" height="14" fill="#bdbdbd" stroke="#000" stroke-width="2"/><rect x="28" y="38" width="7" height="14" fill="#bdbdbd" stroke="#000" stroke-width="2"/><rect x="6" y="54" width="40" height="3" fill="#0a7a0a"/></svg></span></button>
+  <button class="rimg pbtn off" id="ladderBtn" type="button" title="Climb the nearest ladder"><img class="ri" src="Assets/Icons/climb.png" alt="" draggable="false" onload="this.parentNode.classList.add('hasimg')" onerror="this.remove()"><span class="fb"><svg viewBox="0 0 40 74" height="100" shape-rendering="crispEdges"><g fill="#ff8a40"><rect x="5" y="0" width="3" height="74"/><rect x="32" y="0" width="3" height="74"/><rect x="5" y="3" width="30" height="3"/><rect x="5" y="12" width="30" height="3"/><rect x="5" y="60" width="30" height="3"/><rect x="5" y="69" width="30" height="3"/></g><circle cx="21" cy="21" r="5" fill="#ffee00" stroke="#000" stroke-width="1.5"/><rect x="11" y="27" width="20" height="17" fill="#bdbdbd" stroke="#000" stroke-width="2"/><rect x="7" y="17" width="5" height="16" fill="#bdbdbd" stroke="#000" stroke-width="2"/><rect x="13" y="44" width="6" height="14" fill="#bdbdbd" stroke="#000" stroke-width="2"/><rect x="22" y="44" width="6" height="14" fill="#bdbdbd" stroke="#000" stroke-width="2"/></svg></span></button>
   <div class="cbox">
     <button type="button" id="commentBtn">Comment</button>
     <button type="button" id="bugBtn">Report a bug</button>
   </div>
 </div>
 
-<div id="hudStats"><div id="timerTxt">Timer: 60.0</div><div id="scoreTxt">Score: 0</div></div>
+<div id="hudStats"><div id="timerTxt">Timer: 0.0</div><div id="scoreTxt">Score: 0</div></div>
 
 <div id="toolbox" class="win">
   <div class="wtitle"><span>Toolbox</span><button class="wx" id="tbClose" type="button">X</button></div>
@@ -216,7 +240,7 @@ html.mc,html.mc *{cursor:none !important}
     <b>Select / Move / Scale</b> edit one part (parts that belong to a model move, delete and duplicate together). <b>Insert Part</b> adds a brick, <b>Duplicate</b> copies the selection.</div>
     <h3>Running</h3>
     <div>Press <b>Go</b> to spawn Parrot Cay (the song plays), <b>Stop</b> to go back to building.<br>
-    <b>W / S</b> forward / back, <b>A / D</b> turn, arrow keys work too, and <b>U H J K</b> if you turn that on in MENU. <b>Pose</b> lets you position and rotate the limbs.<br>The <b>Timer</b> counts down from 60 while you run and resets when you stop. <b>Score</b> does nothing yet; it is there for models that need it.</div>
+    <b>W / S</b> forward / back, <b>A / D</b> turn, arrow keys work too, and <b>U H J K</b> if you turn that on in MENU. <b>Pose</b> lets you position and rotate the limbs.<br>The <b>Timer</b> counts up from 0 while you run and resets when you stop. <b>Score</b> does nothing yet; it is there for models that need it.</div>
     <h3>Right panel</h3>
     <div><b>?</b> this window. <b>RESET GAME</b> respawns the character. The magnifiers zoom in (+) and out (&minus;).<br>
     The small figures: <b>sit</b>, <b>stand up</b> (you can only walk while standing) and <b>climb the nearest ladder</b>, which carries you up to the platform beside it.</div>
@@ -1156,12 +1180,12 @@ wire('commentBtn',function(){say('Comments are not available yet.');});
 wire('bugBtn',function(){say('Bug reports are not available yet.');});
 
 /* ---------- Timer + Score (shown while running) ---------- */
-var TIMER_START=60,timerT=TIMER_START,lastTT='',score=0,timerEl=$('timerTxt'),scoreEl=$('scoreTxt'),hudStats=$('hudStats');
+var TIMER_START=0,timerT=TIMER_START,lastTT='',score=0,timerEl=$('timerTxt'),scoreEl=$('scoreTxt'),hudStats=$('hudStats');
 function setScore(n){score=n;scoreEl.textContent='Score: '+score;}
 function resetStats(){timerT=TIMER_START;lastTT='';timerEl.textContent='Timer: '+TIMER_START.toFixed(1);setScore(0);}
 function tickTimer(dt){
   if(!running)return;
-  timerT=Math.max(0,timerT-dt);
+  timerT+=dt;
   var t=timerT.toFixed(1);
   if(t!==lastTT){lastTT=t;timerEl.textContent='Timer: '+t;}
 }
