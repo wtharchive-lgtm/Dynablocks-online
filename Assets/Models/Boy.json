@@ -1,0 +1,84 @@
+{
+ "format": "dynablocks-map",
+ "version": 1,
+ "name": "Map",
+ "parts": [
+  {
+   "x": -7,
+   "y": 10,
+   "z": 8,
+   "sx": 2,
+   "sy": 2,
+   "sz": 2,
+   "color": "#f5cd30",
+   "group": 7,
+   "shape": "sphere"
+  },
+  {
+   "x": -7,
+   "y": 8.5,
+   "z": 7.5,
+   "sx": 2,
+   "sy": 1,
+   "sz": 1,
+   "color": "#0d69ac",
+   "group": 7,
+   "smooth": true
+  },
+  {
+   "x": -5.5,
+   "y": 8,
+   "z": 7.5,
+   "sx": 1,
+   "sy": 2,
+   "sz": 1,
+   "color": "#f5cd30",
+   "group": 7,
+   "smooth": true
+  },
+  {
+   "x": -8.5,
+   "y": 8,
+   "z": 7.5,
+   "sx": 1,
+   "sy": 2,
+   "sz": 1,
+   "color": "#f5cd30",
+   "group": 7,
+   "smooth": true
+  },
+  {
+   "x": -7.5,
+   "y": 6,
+   "z": 7.5,
+   "sx": 1,
+   "sy": 2,
+   "sz": 1,
+   "color": "#0d69ac",
+   "group": 7,
+   "smooth": true
+  },
+  {
+   "x": -7,
+   "y": 7.5,
+   "z": 7.5,
+   "sx": 2,
+   "sy": 1,
+   "sz": 1,
+   "color": "#a3a2a5",
+   "group": 7,
+   "smooth": true
+  },
+  {
+   "x": -6.5,
+   "y": 6,
+   "z": 7.5,
+   "sx": 1,
+   "sy": 2,
+   "sz": 1,
+   "color": "#0d69ac",
+   "group": 7,
+   "smooth": true
+  }
+ ]
+}
