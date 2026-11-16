@@ -237,6 +237,7 @@ html.mc,html.mc *{cursor:none !important}
   <h1>Options</h1>
   <button class="btn" id="uhjkBtn" type="button">UHJK movement: OFF</button>
   <button class="btn" id="studBtn" type="button">Studs: Blocky (3D)</button>
+  <button class="btn" id="grpBtn" type="button">Models as one piece: ON</button>
 </div>
 
 <div id="topbar">
@@ -245,6 +246,14 @@ html.mc,html.mc *{cursor:none !important}
   <button class="tm" id="mView" type="button">View</button>
   <button class="tm" id="mInsert" type="button">Insert</button>
   <button class="tm" id="mFormat" type="button">Format</button>
+</div>
+<div id="editMenu" class="dd">
+  <button type="button" data-act="selall">Select All  (Ctrl+A)</button>
+  <button type="button" data-act="selnone">Select None</button>
+  <div class="ddsep"></div>
+  <button type="button" data-act="grp">[x] Move models as one piece</button>
+  <div class="ddsep"></div>
+  <button type="button" data-act="hint">How to box-select...</button>
 </div>
 <div id="fileMenu" class="dd">
   <button type="button" data-act="new">New Baseplate</button>
@@ -294,6 +303,9 @@ html.mc,html.mc *{cursor:none !important}
     Unanchored parts fall when you press Go. The <b>Score Block</b> (Insert) gives +1 Score when you or a vehicle touch it. Sphere, Cylinder and Cone are in the Toolbox under Shapes.</div>
     <h3>Phone / tablet</h3>
     <div>Everything works by tapping. <b>Tap</b> a part to select it, <b>drag</b> with one finger to orbit, <b>pinch</b> to zoom, <b>two-finger drag</b> to pan. Drag the arrows to move or scale. Turn <b>Multi-select</b> ON (bottom) to tap several parts. While running use the <b>joystick</b> (bottom left) and the round <b>Drive / Get out</b> button next to the right menu. Landscape works best.</div>
+    <h3>Selecting many parts</h3>
+    <div>Select tool: <b>drag a box</b> over empty space to select every part inside it (hold <b>Shift</b> to add to what is selected). <b>Ctrl+A</b> or Edit &gt; Select All selects everything. <b>Shift+click</b> still toggles single parts. On a phone turn Multi-select ON and drag.<br>
+    Edit &gt; <b>Move models as one piece</b> (also in Menu) turns model grouping off, so each part of an imported model can be moved, deleted and duplicated on its own.</div>
     <h3>Building</h3>
     <div><b>Right-drag</b> orbit the camera, <b>wheel</b> zoom, <b>W A S D / arrows</b> pan, <b>F</b> focus the selected part, <b>Delete</b> removes it.<br>
     <b>Select / Move / Scale</b> edit one part (parts that belong to a model move, delete and duplicate together). <b>Insert Part</b> adds a brick, <b>Duplicate</b> copies the selection.</div>
@@ -418,7 +430,7 @@ var R=1,CH=6.4,STEP=1.05,GRAV=90,WALK=14,TURN=2.4;
 var drag=null,hoverKey=-1;
 var PALETTE=[0xc4281c,0x0d69ac,0xf5cd30,0x287f47,0xda8541,0xa3a2a5,0x8f49b5,0x20a6a6];
 var palIdx=0;
-var DEFAULT_COL=0xcdcdcd,selSet=[],vw=null,vehSeq=1,partSeq=1;
+var groupModels=true,box=null,DEFAULT_COL=0xcdcdcd,selSet=[],vw=null,vehSeq=1,partSeq=1;
 var poseOn=false,poseSel='armL',poseMode='move';
 var hudHad=false;
 
@@ -534,7 +546,7 @@ function selMembers(){   /* selection + whole model groups + whole vehicles (use
   for(i=0;i<base.length;i++){
     q=base[i];
     for(j=0;j<parts.length;j++){o=parts[j];
-      if(o===q||(q.group&&o.group===q.group)||(q.vehicle&&o.vehicle===q.vehicle)){if(!o.fixed&&out.indexOf(o)<0)out.push(o);}}
+      if(o===q||(groupModels&&q.group&&o.group===q.group)||(q.vehicle&&o.vehicle===q.vehicle)){if(!o.fixed&&out.indexOf(o)<0)out.push(o);}}
   }
   return out;
 }
@@ -801,13 +813,14 @@ function hitPoseHandle(mx,my){
   return best;
 }
 function drawHud(){
-  var need=poseOn||(!running&&(selected||vw));
+  var need=poseOn||(!running&&(selected||vw||(box&&box.on)));
   if(!need){if(hudHad){hctx.clearRect(0,0,VW,VH);hudHad=false;}return;}
   hctx.clearRect(0,0,VW,VH);hudHad=true;
   hctx.lineJoin='round';
   if(poseOn)drawPoseHandles();
   else{
     drawSelection();
+    if(box&&box.on){hctx.fillStyle='rgba(42,140,255,.15)';hctx.strokeStyle='#2a8cff';hctx.lineWidth=1;hctx.fillRect(box.x0,box.y0,box.x1-box.x0,box.y1-box.y0);hctx.strokeRect(box.x0+.5,box.y0+.5,box.x1-box.x0,box.y1-box.y0);}
     var hs=getHandles();
     for(var i=0;i<hs.length;i++){
       var h=hs[i],hot=(hoverKey===h.key)||(drag&&drag.key===h.key);
@@ -996,6 +1009,7 @@ var MAPPED={KeyW:1,KeyA:1,KeyS:1,KeyD:1,ArrowUp:1,ArrowDown:1,ArrowLeft:1,ArrowR
 win.addEventListener('keydown',function(e){
   var c=e.code,tg=e.target&&e.target.tagName;
   if(tg==='INPUT'||tg==='SELECT'||tg==='TEXTAREA')return;
+  if(c==='KeyA'&&(e.ctrlKey||e.metaKey)){if(!running)selectAll();e.preventDefault();return;}
   if(MAPPED[c]){keys[c]=true;e.preventDefault();return;}
   if(c==='Delete'||c==='Backspace'){deleteSelected();e.preventDefault();}
   else if(c==='KeyF'&&selected&&!running){focus=[selected.x,selected.y,selected.z];}
@@ -1027,6 +1041,7 @@ canvas.addEventListener('mousedown',function(e){
     }
   }else if(!running&&!vw){
     var h=hitHandle(mx,my);
+    if(!h)box={x0:mx,y0:my,x1:mx,y1:my,on:false};
     if(h){
       var s=selected,L=h.L;
       drag={kind:'build',key:h.key,a:h.a,s:h.s,vx:(h.st[0]-h.sf[0])/L,vy:(h.st[1]-h.sf[1])/L,mx:mx,my:my,
@@ -1090,6 +1105,12 @@ win.addEventListener('mousemove',function(e){
     say('Part  pos '+s.x+', '+s.y+', '+s.z+'  size '+s.sx+' x '+s.sy+' x '+s.sz);
     return;
   }
+  if(box&&ms.down&&ms.btn===0){
+    box.x1=mx;box.y1=my;
+    if(!box.on&&hyp(mx-box.x0,my-box.y0)>6)box.on=true;
+    if(box.on)ms.moved=true;
+    return;
+  }
   if(ms.down){
     if(!ms.moved&&hyp(mx-ms.sx,my-ms.sy)>4)ms.moved=true;
     if(ms.btn===2){
@@ -1106,7 +1127,19 @@ win.addEventListener('mousemove',function(e){
 win.addEventListener('mouseup',function(e){
   if(!ms.down)return;
   ms.down=false;
-  if(drag){drag=null;return;}
+  if(drag){drag=null;box=null;return;}
+  if(box&&box.on){
+    var bx=box,x0=Math.min(bx.x0,bx.x1),x1=Math.max(bx.x0,bx.x1),y0=Math.min(bx.y0,bx.y1),y1=Math.max(bx.y0,bx.y1);
+    box=null;
+    var addB=e.shiftKey||e.ctrlKey||e.metaKey,list=addB?selList().slice():[],n0=list.length,k;
+    for(k=0;k<parts.length;k++){var bp=parts[k];if(bp.fixed||list.indexOf(bp)>=0)continue;
+      var sp=proj(bp.x,bp.y,bp.z);
+      if(sp&&sp[0]>=x0&&sp[0]<=x1&&sp[1]>=y0&&sp[1]<=y1)list.push(bp);}
+    if(list.length){selected=list[list.length-1];selSet=list;say(list.length+' parts selected.');}
+    else if(!addB){selected=null;selSet=[];say('Nothing inside the box.');}
+    return;
+  }
+  box=null;
   if(e.button===0&&!ms.moved&&e.target===canvas){
     if(poseOn){pickLimb(e.clientX,e.clientY);}
     else if(!running){
@@ -1322,16 +1355,47 @@ $('modelIn').addEventListener('change',function(){
 
 /* ---------- top menu bar ---------- */
 var fileMenu=$('fileMenu');
-function closeMenus(){fileMenu.classList.remove('show');}
+var editMenu=$('editMenu');
+function closeMenus(){fileMenu.classList.remove('show');editMenu.classList.remove('show');}
 $('mFile').addEventListener('click',function(e){
   var r=this.getBoundingClientRect();fileMenu.style.left=r.left+'px';fileMenu.style.top=r.bottom+'px';
   fileMenu.classList.toggle('show');e.stopPropagation();
 });
 $('mInsert').addEventListener('click',function(e){closeMenus();toggleToolbox();e.stopPropagation();});
-['mEdit','mView','mFormat'].forEach(function(id){
+$('mEdit').addEventListener('click',function(e){
+  var r=this.getBoundingClientRect(),was=editMenu.classList.contains('show');closeMenus();
+  editMenu.style.left=r.left+'px';editMenu.style.top=r.bottom+'px';editMenu.classList.toggle('show',!was);e.stopPropagation();
+});
+function selectAll(){
+  if(running)return;
+  var all=parts.filter(function(p){return !p.fixed;});
+  if(!all.length){say('Nothing to select.');return;}
+  selected=all[all.length-1];selSet=all;say(all.length+' parts selected.');
+}
+function selectNone(){selected=null;selSet=[];}
+function setGroupModels(v){
+  groupModels=v;
+  $('grpBtn').textContent='Models as one piece: '+(v?'ON':'OFF');
+  var b=editMenu.querySelector('[data-act=grp]');b.textContent=(v?'[x] ':'[ ] ')+'Move models as one piece';
+  prKey='';
+  say(v?'Imported models move, delete and duplicate as one piece.':'Imported models are now loose parts: each part moves on its own.');
+}
+wire('grpBtn',function(){setGroupModels(!groupModels);});
+editMenu.addEventListener('click',function(e){
+  var b=e.target;while(b&&b!==editMenu&&!(b.getAttribute&&b.getAttribute('data-act')))b=b.parentNode;
+  if(!b||b===editMenu)return;
+  var act=b.getAttribute('data-act');
+  if(act==='grp'){setGroupModels(!groupModels);return;}
+  closeMenus();
+  if(running){say('Stop the game first (press Stop).');return;}
+  if(act==='selall')selectAll();
+  else if(act==='selnone'){selectNone();say('Selection cleared.');}
+  else if(act==='hint')say(win.__mobile?'Turn Multi-select ON, then drag a box over the parts you want.':'Select tool: drag a box over empty space. Hold Shift to add to the selection.');
+});
+['mView','mFormat'].forEach(function(id){
   $(id).addEventListener('click',function(e){closeMenus();say('"'+this.textContent+'" is not available yet.');e.stopPropagation();});
 });
-doc.addEventListener('mousedown',function(e){if(!fileMenu.contains(e.target)&&e.target!==$('mFile'))closeMenus();});
+doc.addEventListener('mousedown',function(e){if(!fileMenu.contains(e.target)&&!editMenu.contains(e.target)&&e.target!==$('mFile')&&e.target!==$('mEdit'))closeMenus();});
 win.addEventListener('keydown',function(e){if(e.code==='Escape'){closeMenus();$('helpWin').classList.remove('show');}});
 fileMenu.addEventListener('click',function(e){
   var b=e.target;while(b&&b!==fileMenu&&!(b.getAttribute&&b.getAttribute('data-act')))b=b.parentNode;
@@ -1684,10 +1748,10 @@ var multiOn=false;
     if(e.touches.length===1){
       var t=e.touches[0];sx=lx=t.clientX;sy=ly=t.clientY;t0=performance.now();moved=false;
       var onH=poseOn?!!hitPoseHandle(sx,sy):(!running&&!vw&&!!hitHandle(sx,sy));
-      mode=onH?'handle':'orbit';
-      fire('mousedown',sx,sy,onH?0:2);
+      mode=onH?'handle':((multiOn&&!running&&!poseOn&&!vw)?'box':'orbit');
+      fire('mousedown',sx,sy,mode==='orbit'?2:0);
     }else if(e.touches.length===2){
-      if(mode==='handle'||mode==='orbit')fire('mouseup',lx,ly,mode==='handle'?0:2);
+      if(mode==='handle'||mode==='orbit'||mode==='box')fire('mouseup',lx,ly,mode==='orbit'?2:0);
       mode='two';var g=two(e);pd=g.d;pmx=g.x;pmy=g.y;
     }else mode='none';
   },{passive:false});
@@ -1705,16 +1769,16 @@ var multiOn=false;
         focus[0]=clamp(focus[0],-64,64);focus[2]=clamp(focus[2],-64,64);
       }
       pmx=g.x;pmy=g.y;
-    }else if((mode==='handle'||mode==='orbit')&&e.touches.length===1){
+    }else if((mode==='handle'||mode==='orbit'||mode==='box')&&e.touches.length===1){
       var t=e.touches[0];lx=t.clientX;ly=t.clientY;
       if(hyp(lx-sx,ly-sy)>8)moved=true;
-      fire('mousemove',lx,ly,mode==='handle'?0:2);
+      fire('mousemove',lx,ly,mode==='orbit'?2:0);
     }
   },{passive:false});
   function endT(e){
     e.preventDefault();
     if(e.touches.length>0)return;
-    if(mode==='handle')fire('mouseup',lx,ly,0);
+    if(mode==='handle'||mode==='box')fire('mouseup',lx,ly,0);
     else if(mode==='orbit'){
       fire('mouseup',lx,ly,2);
       if(!moved&&performance.now()-t0<500){fire('mousedown',sx,sy,0);fire('mouseup',sx,sy,0);}
@@ -1773,4 +1837,4 @@ requestAnimationFrame(frame);
 })();
 </script>
 </body>
-  </html>
+</html>
